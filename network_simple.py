@@ -69,7 +69,6 @@ class SimpleConvRecurrent(nn.Module):
     def forward(self, z, prediction_len, diff=False, predict_diff_data=None):
         """Forward method."""
 
-        pdb.set_trace()
         output_inner = []
         size = z.size()
         seq_len = z.size(0)
@@ -89,6 +88,7 @@ class SimpleConvRecurrent(nn.Module):
 
             y = hidden_state[0]
 
+            pdb.set_trace()
             y = F.relu(self.convd4(y))
             y = F.relu(self.convd3(y))
             y = F.relu(self.convd2(y))

@@ -10,6 +10,7 @@ import os
 import torch
 from colors import print_blue, print_green, print_red
 from data_loader_1 import SequenceLoader
+from log_loss import log_loss
 from process import process_data
 
 #from torchsummary import summary
@@ -57,18 +58,11 @@ def main():
     # torch.backends.cudnn.benchmark = True
 
     print_blue("Creating data loader...")
-    ds = SequenceLoader(root_dir,
-                        args.seq_length_min,
-                        args.step_min,
-                        args.window_train,
-                        args.window_predict,
-                        state='training')
-    ds_val = SequenceLoader(root_dir,
-                            args.seq_length_min,
-                            args.step_min,
-                            args.window_train,
-                            args.window_predict,
-                            state='testing')
+    ds = SequenceLoader('train', root_dir, args.seq_length_min, args.step_min,
+                        args.window_train, args.window_predict)
+    ds_val = SequenceLoader('validation', root_dir, args.seq_length_min,
+                            args.step_min, args.window_train,
+                            args.window_predict)
     train_loader = torch.utils.data.DataLoader(ds,
                                                batch_size=args.batch_size,
                                                shuffle=True,
@@ -114,27 +108,22 @@ def main():
     if not args.test:
         print_blue("TRAINING")
 
-        loss_table = []
-        rms_table = []
-        rms_periodic_table = []
-
         # iterate on epochs
         for epoch in range(epoch_max):
 
             print_green("Epoch", epoch)
 
             # train
-            loss, rms_, rms_periodic, rms_per_frame, rms_per_frame_periodic, _, _ = process_data(
-                net=net,
-                optimizer=optimizer,
-                criterion=criterion,
-                train_loader=train_loader,
-                test_loader=test_loader,
-                window_train=args.window_train,
-                window_predict=args.window_predict,
-                diff=args.diff,
-                cuda=args.cuda,
-                training=True)
+            dict_loss = process_data(net=net,
+                                     optimizer=optimizer,
+                                     criterion=criterion,
+                                     train_loader=train_loader,
+                                     test_loader=test_loader,
+                                     window_train=args.window_train,
+                                     window_predict=args.window_predict,
+                                     diff=args.diff,
+                                     cuda=args.cuda,
+                                     training=True)
 
             # save the model
             torch.save(net.state_dict(),
@@ -147,44 +136,17 @@ def main():
     net.load_from_filename(os.path.join(args.target, "state_dict.pth"))
 
     with torch.no_grad():
-        loss, rms_, rms_periodic, rms_per_frame, rms_per_frame_periodic, rms_per_sequence, rms_per_sequence_periodic, rms_lattitude = process_data(
-        )
+        dict_loss = process_data(net=net,
+                                 optimizer=optimizer,
+                                 criterion=criterion,
+                                 train_loader=train_loader,
+                                 test_loader=test_loader,
+                                 window_train=args.window_train,
+                                 window_predict=args.window_predict,
+                                 diff=args.diff,
+                                 cuda=args.cuda)
 
-    print("Testing loss", loss)
-    print("Mean RMS per frame", rms_)
-    print("Mean RMS per frame (periodic)", rms_periodic)
-
-    print("Writing logs")
-    logs = open(os.path.join(args.target, "test_logs_{seq_length}.txt"), "w")
-    logs.write(str(loss) + " ")
-    logs.write(str(rms_) + " ")
-    logs.write(str(rms_periodic) + " ")
-    logs.close()
-
-    logs = open(
-        os.path.join(args.target, f"test_logs_per_frame_{seq_length}.txt"),
-        "w")
-    for frame_id in range(len(rms_per_frame)):
-        logs.write(str(frame_id) + " ")
-        logs.write(str(rms_per_frame[frame_id]) + " ")
-        logs.write(str(rms_per_frame_periodic[frame_id]) + " \n")
-    logs.close()
-
-    logs = open(
-        os.path.join(args.target, f"test_logs_per_sequence_{seq_length}.txt"),
-        'w')
-    for seq_id in range(len(rms_per_sequence)):
-        logs.write(str(seq_id) + " ")
-        logs.write(str(rms_per_sequence[seq_id]) + " ")
-        logs.write(str(rms_per_sequence_periodic[seq_id]) + " \n")
-    logs.close()
-
-    logs = open(
-        os.path.join(args.target, f"test_logs_lattitude_{seq_length}.txt"),
-        'w')
-    for l_id in range(rms_lattitude.shape[0]):
-        logs.write(str(rms_lattitude[l_id]) + " ")
-    logs.close()
+    log_loss(dict_loss, args.target, seq_length)
 
 
 if __name__ == '__main__':
