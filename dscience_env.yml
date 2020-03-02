@@ -57,6 +57,7 @@ dependencies:
   - expat
   - fasteners
   - fiona
+  - flask
   - fontconfig
   - freetype
   - freexl
@@ -90,6 +91,7 @@ dependencies:
   - ipyparallel
   - ipython
   - ipython_genutils
+  - itsdangerous
   - jedi
   - jinja2
   - jmespath
@@ -212,8 +214,6 @@ dependencies:
   - python
   - python-dateutil
   - python-graphviz
-  - pytorch
-  - pytorch-cpu
   - pytz
   - pywavelets
   - pyyaml
@@ -284,12 +284,15 @@ dependencies:
     - argparse
     - colorama
     - filelock
+    - flask-socketio
     - funcsigs
     - numexpr
     - pluggy
     - py
     - pyina
     - pytest
+    - python-engineio
+    - python-socketio
     - ray
     - redis
     - scoop
