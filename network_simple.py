@@ -88,7 +88,6 @@ class SimpleConvRecurrent(nn.Module):
 
             y = hidden_state[0]
 
-            pdb.set_trace()
             y = F.relu(self.convd4(y))
             y = F.relu(self.convd3(y))
             y = F.relu(self.convd2(y))
