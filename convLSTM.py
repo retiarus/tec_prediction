@@ -45,8 +45,10 @@ class CLSTM_cell(nn.Module):
                               4 * self.hidden_size,
                               self.kernel_size,
                               1,
-                              padding=padding,
-                              dilation=dilation)
+                              padding=padding)
+
+
+#                              dilation=dilation)
 
     def forward(self, input, prev_state=None):
         """Forward."""
