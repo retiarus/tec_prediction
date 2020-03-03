@@ -7,13 +7,9 @@ License is from https://github.com/aboulch/tec_prediction
 import argparse
 import os
 
-import torch
 from colors import print_blue, print_green, print_red
-from data_loader_1 import SequenceLoader
 from log_loss import log_loss
 from process import process_data
-
-#from torchsummary import summary
 
 
 def main():
@@ -34,6 +30,8 @@ def main():
     parser.add_argument("--test", type=bool, default=False)
     parser.add_argument("--model", type=str, default="simple")
     parser.add_argument("--diff", type=bool, default=False)
+    parser.add_argument("--pytorch", type=bool, default=False)
+    parser.add_argument("--data", type=str, default='tec')
     parser.add_argument("--target",
                         type=str,
                         default="./results",
@@ -53,57 +51,121 @@ def main():
     # define optimization parameters
     root_dir = args.source
 
-    # CUDA
-    # if args.cuda:
-    # torch.backends.cudnn.benchmark = True
+    if args.pytorch:
+        import torch
+        from data_loader import SequenceLoader
 
-    print_blue("Creating data loader...")
-    ds = SequenceLoader('train', root_dir, args.seq_length_min, args.step_min,
-                        args.window_train, args.window_predict)
-    ds_val = SequenceLoader('validation', root_dir, args.seq_length_min,
+        # CUDA
+        # if args.cuda:
+        # torch.backends.cudnn.benchmark = True
+
+        print_blue("Creating data loader...")
+        ds = SequenceLoader('train', root_dir, args.seq_length_min,
                             args.step_min, args.window_train,
-                            args.window_predict)
-    train_loader = torch.utils.data.DataLoader(ds,
+                            args.window_predict, args.data)
+        ds_val = SequenceLoader('validation', root_dir, args.seq_length_min,
+                                args.step_min, args.window_train,
+                                args.window_predict, args.data)
+        seq_train = torch.utils.data.DataLoader(ds,
+                                                batch_size=args.batch_size,
+                                                shuffle=True,
+                                                num_workers=2)
+        seq_test = torch.utils.data.DataLoader(ds_val,
                                                batch_size=args.batch_size,
-                                               shuffle=True,
+                                               shuffle=False,
                                                num_workers=2)
-    test_loader = torch.utils.data.DataLoader(ds_val,
-                                              batch_size=args.batch_size,
-                                              shuffle=False,
-                                              num_workers=2)
 
-    print_blue("Creating network...")
-    if args.model == "simple":
-        from network_simple import SimpleConvRecurrent
-        net = SimpleConvRecurrent(1)
-    elif args.model == "unet":
-        from network_unet import UnetConvRecurrent
-        net = UnetConvRecurrent(1)
-    elif args.model == "dilation121":
-        from network_dilation_121 import UnetConvRecurrent
-        net = UnetConvRecurrent(1)
+        print_blue("Creating network...")
+        if args.model == "simple":
+            from network_simple import SimpleConvRecurrent
+            net = SimpleConvRecurrent(1)
+        elif args.model == "unet":
+            from network_unet import UnetConvRecurrent
+            net = UnetConvRecurrent(1)
+        elif args.model == "dilation121":
+            from network_dilation_121 import UnetConvRecurrent
+            net = UnetConvRecurrent(1)
+        else:
+            print_red("Error bad network")
+            exit()
+
+        # if args.cuda:
+        #     net.cuda()
+
+        print("PARAMTERS")
+
+        #    summary(net, (args.window_train, args.batch, 1, 72, 72))
+
+        def count_parameters(model):
+            return sum(p.numel() for p in model.parameters()
+                       if p.requires_grad)
+
+        print(count_parameters(net))
+        # exit()
+
+        print_blue("Setting up the optimizer...")
+        optimizer = torch.optim.Adam(net.parameters(), lr=1e-3)
+
+        print_blue("Setting up the criterion...")
+        criterion = torch.nn.L1Loss()
     else:
-        print_red("Error bad network")
-        exit()
+        from data_generator import DataGenerator
+        from tensorflow.keras import losses, optimizers
 
-    # if args.cuda:
-    #     net.cuda()
+        print_blue("Creating data loader...")
+        seq_train = DataGenerator(name='train',
+                                  path_files=root_dir,
+                                  seq_length_min=args.seq_length_min,
+                                  step_min=args.step_min,
+                                  window_train=args.window_train,
+                                  window_predict=args.window_predict,
+                                  batch_size=args.batch_size,
+                                  to_fit=True,
+                                  diff=args.diff)
+        seq_test = DataGenerator(name='test',
+                                 path_files=root_dir,
+                                 seq_length_min=args.seq_length_min,
+                                 step_min=args.step_min,
+                                 window_train=args.window_train,
+                                 window_predict=args.window_predict,
+                                 batch_size=args.batch_size,
+                                 to_fit=True,
+                                 diff=args.diff)
+        seq_test = DataGenerator(name='validation',
+                                 path_files=root_dir,
+                                 seq_length_min=args.seq_length_min,
+                                 step_min=args.step_min,
+                                 window_train=args.window_train,
+                                 window_predict=args.window_predict,
+                                 batch_size=args.batch_size,
+                                 to_fit=True,
+                                 diff=args.diff)
 
-    print("PARAMTERS")
+        print_blue("Creating network...")
+        if args.model == "simple":
+            from network_simple_keras import SimpleConvRecurrent
+            net = SimpleConvRecurrent(input_nbr=1)
+        elif args.model == "unet":
+            pass
+            # from network_unet import UnetConvRecurrent
+            # net = UnetConvRecurrent(1)
+        elif args.model == "dilation121":
+            pass
+            # from network_dilation_121 import UnetConvRecurrent
+            # net = UnetConvRecurrent(1)
+        else:
+            print_red("Error bad network")
+            exit()
 
-    #    summary(net, (args.window_train, args.batch, 1, 72, 72))
+        print("PARAMTERS")
 
-    def count_parameters(model):
-        return sum(p.numel() for p in model.parameters() if p.requires_grad)
+        #print(count_parameters(net))
 
-    print(count_parameters(net))
-    # exit()
+        print_blue("Setting up the optimizer...")
+        optimizer = optimizers.Adam(1e-4)
 
-    print_blue("Setting up the optimizer...")
-    optimizer = torch.optim.Adam(net.parameters(), lr=1e-3)
-
-    print_blue("Setting up the criterion...")
-    criterion = torch.nn.L1Loss()
+        print_blue("Setting up the criterion...")
+        criterion = losses.MeanSquaredError()
 
     if not args.test:
         print_blue("TRAINING")
@@ -117,34 +179,48 @@ def main():
             dict_loss = process_data(net=net,
                                      optimizer=optimizer,
                                      criterion=criterion,
-                                     train_loader=train_loader,
-                                     test_loader=test_loader,
+                                     train_loader=seq_train,
+                                     test_loader=seq_test,
                                      window_train=args.window_train,
                                      window_predict=args.window_predict,
                                      diff=args.diff,
                                      cuda=args.cuda,
+                                     pytorch=args.pytorch,
                                      training=True)
 
             # save the model
-            torch.save(net.state_dict(),
-                       os.path.join(args.target, "state_dict.pth"))
+            if args.pytorch:
+                torch.save(net.state_dict(),
+                           os.path.join(args.target, "state_dict.pth"))
 
     # Test mode
     print_blue("TESTING")
 
     print_blue("Loading model")
-    net.load_from_filename(os.path.join(args.target, "state_dict.pth"))
+    if args.pytorch:
+        net.load_from_filename(os.path.join(args.target, "state_dict.pth"))
 
-    with torch.no_grad():
+        with torch.no_grad():
+            dict_loss = process_data(net=net,
+                                     optimizer=optimizer,
+                                     criterion=criterion,
+                                     train_loader=seq_train,
+                                     test_loader=seq_test,
+                                     window_train=args.window_train,
+                                     window_predict=args.window_predict,
+                                     diff=args.diff,
+                                     cuda=args.cuda,
+                                     pytorch=args.pytorch)
+    else:
         dict_loss = process_data(net=net,
                                  optimizer=optimizer,
                                  criterion=criterion,
-                                 train_loader=train_loader,
-                                 test_loader=test_loader,
+                                 train_loader=seq_train,
+                                 test_loader=seq_test,
                                  window_train=args.window_train,
                                  window_predict=args.window_predict,
                                  diff=args.diff,
-                                 cuda=args.cuda)
+                                 training=False)
 
     log_loss(dict_loss, args.target, seq_length)
 
