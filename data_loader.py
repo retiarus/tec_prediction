@@ -28,16 +28,16 @@ class SequenceLoader(data.Dataset):
         self.shape = (72, 72)
         self.data = data
 
-        if data not in ['tec', 'scin', 'tec+scin']:
+        if self.data not in ['tec', 'scin', 'tec+scin']:
             raise Exception(f'No valid data')
 
         # try load samples from file, if not generate samples from database
-        file = f'samples_{self.name}_{self.seq_length_min}_{self.step_min}_{data}.pkl'
+        file = f'samples_{self.name}_{self.seq_length_min}_{self.step_min}_{self.data}.pkl'
         path = os.path.join('./data', file)
         if os.path.isfile(path):
             self.samples = pickle.load(open(path, "rb"))
             self.df = pd.read_pickle(
-                os.path.join('./data', f'df_{name}_{data}.pkl'))
+                os.path.join('./data', f'df_{name}_{self.data}.pkl'))
         else:
             raise Exception(f'No valid df and samples list find in {file}')
 
