@@ -126,10 +126,7 @@ class DataGenerator(Sequence):
         x_periodic = get_periodic(x, self.window_predict)
         x_blur = blur_array(x_periodic)
 
-        return {
-            'x': x.astype('np.float32'),
-            'blur': x_blur.astype('np.float32')
-        }
+        return {'x': x.astype(np.float32), 'blur': x_blur.astype(np.float32)}
 
     def _generate_y(self, y_samples_temp):
         y = np.empty((self.batch_size, self.window_predict, 1,
@@ -140,7 +137,7 @@ class DataGenerator(Sequence):
 
             y[i, :, :, :, :] = self.load_sample(index_start, index_end)
 
-        return y.astype('np.float32')
+        return y.astype(np.float32)
 
     def len(self):
         return len(self.x_samples)
