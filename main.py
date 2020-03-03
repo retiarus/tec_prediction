@@ -42,6 +42,10 @@ def main():
 
     seq_length = int(args.seq_length_min / args.step_min)
 
+    if args.pytorch:
+        print_green("Using Pytorch")
+    else:
+        print_green("Using Keras")
     print_green("Sequence length:", seq_length)
 
     # create the result directory
@@ -119,6 +123,7 @@ def main():
                                   step_min=args.step_min,
                                   window_train=args.window_train,
                                   window_predict=args.window_predict,
+                                  data=args.data,
                                   batch_size=args.batch_size,
                                   to_fit=True,
                                   diff=args.diff)
@@ -128,6 +133,7 @@ def main():
                                  step_min=args.step_min,
                                  window_train=args.window_train,
                                  window_predict=args.window_predict,
+                                 data=args.data,
                                  batch_size=args.batch_size,
                                  to_fit=True,
                                  diff=args.diff)
@@ -137,6 +143,7 @@ def main():
                                  step_min=args.step_min,
                                  window_train=args.window_train,
                                  window_predict=args.window_predict,
+                                 data=args.data,
                                  batch_size=args.batch_size,
                                  to_fit=True,
                                  diff=args.diff)
