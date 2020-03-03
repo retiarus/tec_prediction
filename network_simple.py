@@ -15,9 +15,11 @@ from convLSTM import CLSTM_cell as Recurrent_cell
 
 class SimpleConvRecurrent(nn.Module):
     """Segnet network."""
-    def __init__(self, input_nbr, num_features=8):
+    def __init__(self, input_nbr, num_features=8, cuda=False):
         """Init fields."""
         super(SimpleConvRecurrent, self).__init__()
+
+        self.cuda = cuda
 
         self.conv1 = nn.Conv2d(input_nbr,
                                num_features,
@@ -41,7 +43,7 @@ class SimpleConvRecurrent(nn.Module):
 
         kernel_size = 3
         self.convRecurrentCell = Recurrent_cell(num_features, num_features,
-                                                kernel_size)
+                                                kernel_size, cuda)
 
         self.convd4 = nn.Conv2d(num_features,
                                 num_features,

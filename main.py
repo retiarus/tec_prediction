@@ -60,8 +60,8 @@ def main():
         from data_loader import SequenceLoader
 
         # CUDA
-        # if args.cuda:
-        # torch.backends.cudnn.benchmark = True
+        if args.cuda:
+            torch.backends.cudnn.benchmark = True
 
         print_blue("Creating data loader...")
         ds = SequenceLoader('train', root_dir, args.seq_length_min,
@@ -82,7 +82,7 @@ def main():
         print_blue("Creating network...")
         if args.model == "simple":
             from network_simple import SimpleConvRecurrent
-            net = SimpleConvRecurrent(1)
+            net = SimpleConvRecurrent(1, cuda=args.cuda)
         elif args.model == "unet":
             from network_unet import UnetConvRecurrent
             net = UnetConvRecurrent(1)
@@ -93,8 +93,8 @@ def main():
             print_red("Error bad network")
             exit()
 
-        # if args.cuda:
-        #     net.cuda()
+        if args.cuda:
+            net.cuda()
 
         print("PARAMTERS")
 
@@ -105,7 +105,6 @@ def main():
                        if p.requires_grad)
 
         print(count_parameters(net))
-        # exit()
 
         print_blue("Setting up the optimizer...")
         optimizer = torch.optim.Adam(net.parameters(), lr=1e-3)
@@ -163,10 +162,6 @@ def main():
         else:
             print_red("Error bad network")
             exit()
-
-        print("PARAMTERS")
-
-        #print(count_parameters(net))
 
         print_blue("Setting up the optimizer...")
         optimizer = optimizers.Adam(1e-4)

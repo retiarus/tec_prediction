@@ -30,9 +30,12 @@ class CLSTM_cell(nn.Module):
                  hidden_size,
                  kernel_size,
                  dilation=1,
+                 cuda=False,
                  padding=None):
         """Init."""
         super(CLSTM_cell, self).__init__()
+        self.cuda = cuda
+
         if padding is None:
             padding = kernel_size // 2
         self.input_size = input_size
@@ -52,13 +55,16 @@ class CLSTM_cell(nn.Module):
 
         if prev_state is None:
             state_size = [batch_size, self.hidden_size] + list(spatial_size)
-            #            if(next(self.conv.parameters()).is_cuda):
-            #                prev_state = [Variable(torch.zeros(state_size)).cuda(), Variable(torch.zeros(state_size)).cuda()]
-            #            else:
-            prev_state = [
-                Variable(torch.zeros(state_size)),
-                Variable(torch.zeros(state_size))
-            ]
+            if self.cuda:
+                prev_state = [
+                    Variable(torch.zeros(state_size)).cuda(),
+                    Variable(torch.zeros(state_size)).cuda()
+                ]
+            else:
+                prev_state = [
+                    Variable(torch.zeros(state_size)),
+                    Variable(torch.zeros(state_size))
+                ]
 
         hidden, c = prev_state  # hidden and c are images with several channels
         combined = torch.cat((input, hidden), 1)  # oncatenate in the channels
