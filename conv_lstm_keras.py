@@ -12,9 +12,11 @@ https://github.com/aboulch/tec_prediction
 LGPLv3 for research and for commercial use see the LICENSE.md file in the repository
 """
 
-import tensorfow as tf
-from tf.keras import Model
-from tf.keras.layers import Conv2D
+import tensorflow as tf
+from tensorflow.keras import Model
+from tensorflow.keras.layers import Conv2D, ZeroPadding2D
+
+tf.keras.backend.set_floatx('float32')
 
 
 class CLSTM_cell(Model):
@@ -25,21 +27,29 @@ class CLSTM_cell(Model):
       filter_size: int that is the height and width of the filters
       num_features: int thats the num of channels of the states, like hidden_size
     """
-
-    def __init__(self, input_size, hidden_size, kernel_size,
-                 dilation=1, padding=None):
+    def __init__(self,
+                 input_size,
+                 hidden_size,
+                 kernel_size,
+                 dilation=1,
+                 padding=None):
         """Init."""
         super(CLSTM_cell, self).__init__()
         if padding is None:
             padding = kernel_size // 2
+        self.padding = ZeroPadding2D(padding=(padding, padding),
+                                     data_format='channels_first')
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.kernel_size = kernel_size
-        self.conv = Conv2D(4*self.hidden_size, self.kernel_size,
-                           strids=(1, 1), padding=padding,
+        self.conv = Conv2D(4 * self.hidden_size,
+                           self.kernel_size,
+                           strides=(1, 1),
+                           padding='valid',
                            dilation_rate=dilation,
                            data_format='channels_first')
 
+    @tf.function
     def call(self, input_tensor, prev_state=None, training=False):
         """Forward."""
         batch_size = tf.shape(input_tensor).numpy()[0]
@@ -50,15 +60,18 @@ class CLSTM_cell(Model):
             prev_state = [tf.zeros(state_size), tf.zeros(state_size)]
 
         hidden, c = prev_state  # hidden and c are images with several channels
-        combined = tf.concat([input_tensor, hidden], 1)  # oncatenate in the channels
+        combined = tf.concat([input_tensor, hidden],
+                             1)  # oncatenate in the channels
         # print('combined',combined.size())
+        combined = self.padding(combined)
         A = self.conv(combined)
-        (ai, af, ao, ag) = tf.split(A, num_or_size_splits=4, dim=1)  # it should return 4 tensors
+        (ai, af, ao, ag) = tf.split(A, num_or_size_splits=4,
+                                    axis=1)  # it should return 4 tensors
         i = tf.math.sigmoid(ai)
         f = tf.math.sigmoid(af)
         o = tf.math.sigmoid(ao)
         g = tf.nn.relu(ag)
 
-        next_c = f*c+i*g
-        next_h = o*tf.nn.relu(next_c)
+        next_c = f * c + i * g
+        next_h = o * tf.nn.relu(next_c)
         return next_h, next_c
