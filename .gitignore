@@ -1,0 +1,6 @@
+.ipynb_checkpoints/*
+.mypy_cache/*
+.vim/*
+__pycache__/*
+
+tags
