@@ -1,31 +1,36 @@
+import tensorflow as tf
 from conv_lstm_keras import CLSTM_cell as RecurrentCell
-from tf.keras import Model
-from tf.keras.layers import Conv2D, Conv2DTranspose
-from tf.nn import relu
+from tensorflow.keras import Model
+from tensorflow.keras.layers import Conv2D, Conv2DTranspose, ZeroPadding2D
+
+tf.keras.backend.set_floatx('float32')
 
 
-class simple_conv_recurrent(Model):
-    def __init__(self, input_nbr, num_map_features=8):
-        super(simple_conv_recurrent, self).__init__()
+class SimpleConvRecurrent(Model):
+    def __init__(self, input_nbr, num_map_features=16, diff=False):
+        super(SimpleConvRecurrent, self).__init__()
+        self.diff = False
 
+        self.padding = ZeroPadding2D(padding=(1, 1),
+                                     data_format='channels_first')
         self.conv1 = Conv2D(num_map_features,
                             kernel_size=3,
-                            padding=(1, 1),
-                            strids=(2, 2),
+                            padding='valid',
+                            strides=(2, 2),
                             data_format='channels_first')
         self.conv2 = Conv2D(num_map_features,
                             kernel_size=3,
-                            padding=(1, 1),
-                            stride=(2, 2),
+                            padding='valid',
+                            strides=(2, 2),
                             data_format='channels_first')
         self.conv3 = Conv2D(num_map_features,
                             kernel_size=3,
-                            padding=(1, 1),
-                            stride=(2, 2),
+                            padding='valid',
+                            strides=(2, 2),
                             data_format='channels_first')
         self.conv4 = Conv2D(num_map_features,
                             kernel_size=1,
-                            padding=(0, 0),
+                            padding='valid',
                             data_format='channels_first')
 
         kernel_size = 3
@@ -34,76 +39,86 @@ class simple_conv_recurrent(Model):
 
         self.convd4 = Conv2D(num_map_features,
                              kernel_size=1,
-                             padding=(0, 0),
+                             padding='same',
                              data_format='channels_first')
         self.convd3 = Conv2DTranspose(num_map_features,
                                       kernel_size=3,
-                                      padding=(1, 1),
-                                      stride=(2, 2),
-                                      output_padding=(1, 1))
+                                      padding='same',
+                                      strides=(2, 2),
+                                      output_padding=(1, 1),
+                                      data_format='channels_first')
         self.convd2 = Conv2DTranspose(num_map_features,
                                       kernel_size=3,
-                                      padding=(1, 1),
-                                      stride=(2, 2),
-                                      output_padding=(1, 1))
+                                      padding='same',
+                                      strides=(2, 2),
+                                      output_padding=(1, 1),
+                                      data_format='channels_first')
         self.convd1 = Conv2DTranspose(input_nbr,
                                       kernel_size=3,
-                                      padding=(1, 1),
-                                      stride=(2, 2),
-                                      output_padding=(1, 1))
+                                      padding='same',
+                                      strides=(2, 2),
+                                      output_padding=(1, 1),
+                                      data_format='channels_first')
 
-        def call(self, z, window_predict, diff=False, predict_diff_data=None):
-            output_inner = []
-            size = z.shape
-            seq_len = z.shape[0]
+    def call(self, inputs, training=False):
+        if type(inputs) is not dict or len(inputs) <= 1:
+            raise Exception('inputs is not a tuple')
+        x = inputs['x']
+        blur = inputs['blur']
 
-            hidden_state = None
-            for t in range(seq_len):
-                x = z[t, ...]
-                x = relu(self.conv1(x))
-                x = relu(self.conv2(x))
-                x = relu(self.conv3(x))
-                x = relu(self.conv4(x))
+        size = tuple(x.get_shape())
+        window_train = size[0]
+        window_predict = (blur.get_shape())[0]
 
-                hidden_state = self.conv_recurrent_cell(x, hidden_state)
+        hidden_state = None
+        output_inner = []
+        for t in range(window_train):
+            z = x[t, :]
+            z = self.padding(z)
+            z = tf.nn.relu(self.conv1(z))
+            z = self.padding(z)
+            z = tf.nn.relu(self.conv2(z))
+            z = self.padding(z)
+            z = tf.nn.relu(self.conv3(z))
+            z = tf.nn.relu(self.conv4(z))
 
-                y = hidden_state[0]
+            hidden_state = self.conv_recurrent_cell(z, hidden_state)
 
-                y = relu(self.convd4(y))
-                y = relu(self.convd3(y))
-                y = relu(self.convd2(y))
-                y = self.convd1(y)
+            y = hidden_state[0]
+
+            y = tf.nn.relu(self.convd4(y))
+            y = tf.nn.relu(self.convd3(y))
+            y = tf.nn.relu(self.convd2(y))
+            y = self.convd1(y)
+
+        output_inner.append(y)
+
+        for t in range(window_predict - 1):  # loop for every step
+
+            if self.diff:
+                z = y + blur[t, :]
+            else:
+                z = y
+
+            # coder
+            z = self.padding(z)
+            z = tf.nn.relu(self.conv1(z))
+            z = self.padding(z)
+            z = tf.nn.relu(self.conv2(z))
+            z = self.padding(z)
+            z = tf.nn.relu(self.conv3(z))
+            z = tf.nn.relu(self.conv4(z))
+
+            # recurrent
+            hidden_state = self.conv_recurrent_cell(z, hidden_state)
+
+            y = hidden_state[0]
+
+            y = tf.nn.relu(self.convd4(y))
+            y = tf.nn.relu(self.convd3(y))
+            y = tf.nn.relu(self.convd2(y))
+            y = self.convd1(y)
 
             output_inner.append(y)
 
-            for t in range(window_predict - 1):  #loop for every step
-
-                if (diff):
-                    x = y + predict_diff_data[t, ...]
-                else:
-                    x = y
-
-                # coder
-                x = relu(self.conv1(x))
-                x = relu(self.conv2(x))
-                x = relu(self.conv3(x))
-                x = relu(self.conv4(x))
-
-                # recurrent
-                hidden_state = self.convRecurrentCell(x, hidden_state)
-
-                y = hidden_state[0]
-
-                y = relu(self.convd4(y))
-                y = relu(self.convd3(y))
-                y = relu(self.convd2(y))
-                y = self.convd1(y)
-
-                output_inner.append(y)
-
-
-#            expected_size = (len(output_inner), z.size(1), z.size(2),
-#                             z.size(3), z.size(4))
-#           current_input = torch.cat(output_inner, 0).view(expected_size)
-
-#            return current_input
+        return tf.stack(output_inner)
