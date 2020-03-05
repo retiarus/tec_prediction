@@ -53,7 +53,7 @@ class SequenceLoader(data.Dataset):
                 os.path.join(self.path_files,
                              os.path.basename(aux.path).replace('txt', 'npy')))
 
-        return sample, np.array([index])
+        return sample.astype(np.float32), np.array([index])
 
     def __getitem__(self, index):
         """Get item."""

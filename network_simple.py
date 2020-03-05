@@ -9,8 +9,9 @@ import pdb
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
 from convLSTM import CLSTM_cell as Recurrent_cell
+
+torch.set_default_dtype(torch.float32)
 
 
 class SimpleConvRecurrent(nn.Module):

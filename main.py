@@ -59,6 +59,8 @@ def main():
         import torch
         from data_loader import SequenceLoader
 
+        torch.set_default_dtype(torch.float32)
+
         # Setting device on GPU if available, else CPU
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         print('Using device:', device)
@@ -126,6 +128,9 @@ def main():
         print_blue("Setting up the criterion...")
         criterion = torch.nn.L1Loss()
     else:
+        import tensorflow as tf
+        run_opts = tf.compat.v1.RunOptions(
+            report_tensor_allocations_upon_oom=True)
         from data_generator import DataGenerator
         from tensorflow.keras import losses, optimizers
 
@@ -182,6 +187,8 @@ def main():
 
         print_blue("Setting up the criterion...")
         criterion = losses.MeanSquaredError()
+
+        net.compile(loss=criterion, optimizer=optimizer, options=run_opts)
 
     if not args.test:
         print_blue("TRAINING")

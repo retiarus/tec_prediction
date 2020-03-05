@@ -16,6 +16,8 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 
+torch.set_default_dtype(torch.float32)
+
 
 class CLSTM_cell(nn.Module):
     """Initialize a basic Conv LSTM cell.
