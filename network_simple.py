@@ -16,11 +16,11 @@ torch.set_default_dtype(torch.float32)
 
 class SimpleConvRecurrent(nn.Module):
     """Segnet network."""
-    def __init__(self, input_nbr, num_features=8, cuda=False):
+    def __init__(self, input_nbr, num_features=8, act_cuda=False):
         """Init fields."""
         super(SimpleConvRecurrent, self).__init__()
 
-        self.cuda = cuda
+        self.act_cuda = act_cuda
 
         self.conv1 = nn.Conv2d(input_nbr,
                                num_features,
@@ -44,7 +44,7 @@ class SimpleConvRecurrent(nn.Module):
 
         kernel_size = 3
         self.convRecurrentCell = Recurrent_cell(num_features, num_features,
-                                                kernel_size, cuda)
+                                                kernel_size, act_cuda)
 
         self.convd4 = nn.Conv2d(num_features,
                                 num_features,

@@ -32,11 +32,11 @@ class CLSTM_cell(nn.Module):
                  hidden_size,
                  kernel_size,
                  dilation=1,
-                 cuda=False,
+                 act_cuda=False,
                  padding=None):
         """Init."""
         super(CLSTM_cell, self).__init__()
-        self.cuda = cuda
+        self.act_cuda = act_cuda
 
         if padding is None:
             padding = kernel_size // 2
@@ -59,10 +59,10 @@ class CLSTM_cell(nn.Module):
 
         if prev_state is None:
             state_size = [batch_size, self.hidden_size] + list(spatial_size)
-            if self.cuda:
+            if self.act_cuda:
                 prev_state = [
-                    Variable(torch.zeros(state_size)).cuda(),
-                    Variable(torch.zeros(state_size)).cuda()
+                    Variable(torch.zeros(state_size)).act_cuda(),
+                    Variable(torch.zeros(state_size)).act_cuda()
                 ]
             else:
                 prev_state = [
