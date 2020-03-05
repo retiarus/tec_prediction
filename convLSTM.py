@@ -61,8 +61,8 @@ class CLSTM_cell(nn.Module):
             state_size = [batch_size, self.hidden_size] + list(spatial_size)
             if self.act_cuda:
                 prev_state = [
-                    Variable(torch.zeros(state_size)).act_cuda(),
-                    Variable(torch.zeros(state_size)).act_cuda()
+                    Variable(torch.zeros(state_size)).cuda(),
+                    Variable(torch.zeros(state_size)).cuda()
                 ]
             else:
                 prev_state = [
