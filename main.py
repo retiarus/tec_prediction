@@ -98,7 +98,7 @@ def main():
         print_blue("Creating network...")
         if args.model == "simple":
             from network_simple import SimpleConvRecurrent
-            net = SimpleConvRecurrent(1, cuda=args.cuda)
+            net = SimpleConvRecurrent(1, act_cuda=args.cuda)
         elif args.model == "unet":
             from network_unet import UnetConvRecurrent
             net = UnetConvRecurrent(1)
@@ -168,7 +168,7 @@ def main():
 
         print_blue("Creating network...")
         if args.model == "simple":
-            from network_simple_keras import SimpleConvRecurrent
+            from network_simple_keras2 import SimpleConvRecurrent
             net = SimpleConvRecurrent(input_nbr=1)
         elif args.model == "unet":
             pass
