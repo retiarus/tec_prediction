@@ -2,7 +2,6 @@ import os
 import pickle
 
 import numpy as np
-
 import pandas as pd
 import torch.utils.data as data
 
@@ -27,6 +26,7 @@ class SequenceLoader(data.Dataset):
         self.window_predict = window_predict
         self.shape = (72, 72)
         self.data = data
+        self.step = int(step_min / 10)
 
         if self.data not in ['tec', 'scin', 'tec+scin']:
             raise Exception(f'No valid data')
@@ -49,9 +49,11 @@ class SequenceLoader(data.Dataset):
         sample = np.zeros((int(self.seq_length_min / self.step_min), 1,
                            self.shape[0], self.shape[1]))
         for idx, aux in enumerate(df_aux.itertuples()):
-            sample[idx, 0, :, :] = np.load(
-                os.path.join(self.path_files,
-                             os.path.basename(aux.path).replace('txt', 'npy')))
+            if idx // self.step == 0:
+                sample[idx, 0, :, :] = np.load(
+                    os.path.join(
+                        self.path_files,
+                        os.path.basename(aux.path).replace('txt', 'npy')))
 
         return sample.astype(np.float32), np.array([index])
 
