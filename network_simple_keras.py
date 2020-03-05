@@ -60,6 +60,7 @@ class SimpleConvRecurrent(Model):
                                       output_padding=(1, 1),
                                       data_format='channels_first')
 
+    @tf.function
     def call(self, inputs, training=False):
         if type(inputs) is not dict or len(inputs) <= 1:
             raise Exception('inputs is not a tuple')
