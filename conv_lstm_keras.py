@@ -52,11 +52,12 @@ class CLSTM_cell(Model):
     @tf.function
     def call(self, input_tensor, prev_state=None, training=False):
         """Forward."""
-        batch_size = tf.shape(input_tensor).numpy()[0]
-        spatial_size = tf.shape(input_tensor).numpy()[2:]
+        batch_size = input_tensor.shape[0]
+        spatial_size = input_tensor.shape[2:]
 
         if prev_state is None:
-            state_size = [batch_size, self.hidden_size] + list(spatial_size)
+            state_size = tf.TensorShape(
+                batch_size) + self.hidden_size + spatial_size
             prev_state = [tf.zeros(state_size), tf.zeros(state_size)]
 
         hidden, c = prev_state  # hidden and c are images with several channels
