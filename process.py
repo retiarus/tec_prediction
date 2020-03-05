@@ -77,7 +77,6 @@ def process_data(net,
                 inputs = inputs.cuda()
                 targets = targets.cuda()
 
-            print(targets.shape)
             # code for training and testing fase
             if training:
                 # set gradients to zero
@@ -89,6 +88,7 @@ def process_data(net,
                                       predict_diff_data=periodic_blur)
                 # compute error and backprocj
                 error = criterion(outputs, targets)
+                error_np = error.detach().numpy()
                 error.backward()
                 optimizer.step()
             else:  # testing
@@ -103,8 +103,24 @@ def process_data(net,
             # outputs
             np_outputs = outputs.cpu().data.numpy()
 
+            # update loss
+            calc_errors.update_loss(float(error.cpu().item()))
+
         else:
             import tensorflow as tf
+
+            @tf.function
+            def train_step(net, criterion, optimizer, np_inputs):
+                with tf.GradientTape() as tape:
+                    # forward pass in the network
+                    np_outputs = net(np_inputs, training=True)
+                    error = criterion(np_outputs, np_targets)
+                    gradients = tape.gradient(error, net.trainable_variables)
+                    optimizer.apply_gradients(
+                        zip(gradients, net.trainable_variables))
+
+                    return error, np_outputs
+
             # count number of prediction images
             calc_errors.update_count(batch[1].shape[0] * window_predict)
             np_inputs = batch[0]
@@ -114,19 +130,16 @@ def process_data(net,
 
             # code for training and testing fase
             if training:
-                with tf.GradientTape() as tape:
-                    # forward pass in the network
-                    np_outputs = net(np_inputs, training=True)
-                    pdb.set_trace()
-                    error = criterion(np_outputs, np_targets)
-                    gradients = tape.gradient(error, net.trainable_variables)
-                    optimizer.apply_gradients(
-                        zip(gradients, net.trainable_variables))
+                error, np_outputs = train_step(net, criterion, optimizer,
+                                               np_inputs)
+                error = float(error.cpu().numpy())
+                np_outputs = np_outputs.cpu().numpy()
             else:
                 np_outputs = net(np_inputs)
                 error = criterion(np_outputs, np_targets)
-        # updnate loss
-        calc_errors.update_loss(float(error.cpu().item()))
+
+            # update loss
+            calc_errors.update_loss(error)
 
         calc_errors(np_outputs, np_periodic_blur, np_periodic, np_targets)
 
