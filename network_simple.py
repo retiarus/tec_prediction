@@ -44,7 +44,7 @@ class SimpleConvRecurrent(nn.Module):
 
         kernel_size = 3
         self.convRecurrentCell = Recurrent_cell(num_features, num_features,
-                                                kernel_size, act_cuda)
+                                                kernel_size, self.act_cuda)
 
         self.convd4 = nn.Conv2d(num_features,
                                 num_features,
