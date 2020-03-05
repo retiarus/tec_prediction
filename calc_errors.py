@@ -99,7 +99,7 @@ class CalcErrors:
     def calc_errors(self):
         return global_calc_errors(
             self._rms_global_mean, self._loss, self._rms_, self._rms_lattitude,
-            self._rms_periodic, self._rms_periodic_per_frame,
+            self._rms_periodic, self._rms_per_frame, self._rms_periodic_per_frame,
             self._rms_per_sequence, self._rms_per_sequence_periodic,
             self.window_predict, self._count)
 
