@@ -32,7 +32,7 @@ class CLSTM_cell(nn.Module):
                  hidden_size,
                  kernel_size,
                  dilation=1,
-                 act_cuda=True,
+                 act_cuda=False,
                  padding=None):
         """Init."""
         super(CLSTM_cell, self).__init__()
