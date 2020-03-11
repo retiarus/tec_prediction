@@ -21,6 +21,7 @@ class SimpleConvRecurrent(nn.Module):
         super(SimpleConvRecurrent, self).__init__()
 
         self.act_cuda = act_cuda
+        self.name = 'simple_conv_recurrent_net'
 
         self.conv1 = nn.Conv2d(input_nbr,
                                num_features,
@@ -43,8 +44,10 @@ class SimpleConvRecurrent(nn.Module):
                                padding=0)
 
         kernel_size = 3
-        self.convRecurrentCell = Recurrent_cell(num_features, num_features,
-                                                kernel_size, self.act_cuda)
+        self.convRecurrentCell = Recurrent_cell(num_features,
+                                                num_features,
+                                                kernel_size,
+                                                self.act_cuda)
 
         self.convd4 = nn.Conv2d(num_features,
                                 num_features,
@@ -69,7 +72,8 @@ class SimpleConvRecurrent(nn.Module):
                                          stride=2,
                                          output_padding=1)
 
-    def forward(self, z, prediction_len, diff=False, predict_diff_data=None):
+    def forward(self, z, prediction_len,
+                diff=False, predict_diff_data=None):
         """Forward method."""
 
         output_inner = []
