@@ -83,7 +83,7 @@ class SimpleConvRecurrent(Model):
             z = tf.nn.relu(self.conv3(z))
             z = tf.nn.relu(self.conv4(z))
 
-            hidden_state = self.conv_recurrent_cell(z, hidden_state)
+            hidden_state = self.conv_recurrent_cell(z)
 
             y = hidden_state[0]
 
