@@ -3,7 +3,8 @@ main file
 
 License is from https://github.com/aboulch/tec_prediction
 """
-
+import pdb
+import logging
 import argparse
 import os
 
@@ -38,6 +39,20 @@ def main():
                         help="target directory")
     parser.add_argument("--source", type=str, help="source directory")
     args = parser.parse_args()
+
+    if args.pytorch:
+        tool = 'pytorch'
+    else:
+        tool = 'keras'
+
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
+    handler = logging.FileHandler(
+        f'./log/{args.model}_{args.window_train}_{args.window_predict}_{tool}_{args.data}.log')
+
+    format = logging.Formatter(f'%(levelname)s:%(message)s')
+    handler.setFormatter(format)
+    logger.addHandler(handler)
     epoch_max = args.epochs
 
     seq_length = int(args.seq_length_min / args.step_min)
@@ -210,18 +225,33 @@ def main():
                                      cuda=args.cuda,
                                      pytorch=args.pytorch,
                                      training=True)
+            logger.info(f"{epoch}:train:{dict_loss['loss'],dict_loss['rms_']}")
 
-            # save the model
+
+            with torch.no_grad():
+                dict_loss = process_data(net=net,
+                                         optimizer=optimizer,
+                                         criterion=criterion,
+                                         train_loader=seq_train,
+                                         test_loader=seq_test,
+                                         window_train=args.window_train,
+                                         window_predict=args.window_predict,
+                                         diff=args.diff,
+                                         cuda=args.cuda,
+                                         pytorch=args.pytorch)
+            logger.info(f"{epoch}:test:{dict_loss['loss'],dict_loss['rms_']}")
+
+            # save the model in the end of each epoch
             if args.pytorch:
                 torch.save(net.state_dict(),
-                           os.path.join(args.target, "state_dict.pth"))
+                           os.path.join(args.target, f"state_dict_{args.model}_{args.window_train}_{args.window_predict}_{tool}_{args.data}.pth"))
 
     # Test mode
     print_blue("TESTING")
 
     print_blue("Loading model")
     if args.pytorch:
-        net.load_from_filename(os.path.join(args.target, "state_dict.pth"))
+        net.load_from_filename(os.path.join(args.target, "state_dict_{args.model}_{args.window_train}_{args.window_predict}_{tool}_{args.data}.pth"))
 
         with torch.no_grad():
             dict_loss = process_data(net=net,
