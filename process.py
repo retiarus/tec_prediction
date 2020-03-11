@@ -40,9 +40,6 @@ def process_data(net,
 
     for batch in t:
         if pytorch:
-            # count number of prediction images
-            calc_errors.update_count(batch[0].size(0) * window_predict)
-
             # preprocess the batch (TODO: go pytorch)
             # 1. disable preprocess, start to use relu or elu
             # batch_np = preprocess(batch[0].numpy().transpose((1,0,2,3,4)))
@@ -50,6 +47,9 @@ def process_data(net,
 
             # create inputs and targets for network
             np_inputs, np_targets = get_input_targets(np_batch, window_train)
+
+            # count number of prediction images
+            calc_errors.update_count(batch[0].size(0) * window_predict)
 
             # select window_predict elements from the end of np_input
             # this last elements will have some information about the periodic
@@ -88,7 +88,6 @@ def process_data(net,
                                       predict_diff_data=periodic_blur)
                 # compute error and backprocj
                 error = criterion(outputs, targets)
-                error_np = error.detach().numpy()
                 error.backward()
                 optimizer.step()
             else:  # testing
@@ -103,8 +102,7 @@ def process_data(net,
             # outputs
             np_outputs = outputs.cpu().data.numpy()
 
-            # update loss
-            calc_errors.update_loss(float(error.cpu().item()))
+            calc_errors.update_loss(float(error.cpu().detach().numpy()))
 
         else:
             import tensorflow as tf
