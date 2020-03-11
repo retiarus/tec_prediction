@@ -11,8 +11,7 @@ from tqdm import tqdm
 def process_data(net,
                  optimizer,
                  criterion,
-                 train_loader,
-                 test_loader,
+                 loader,
                  window_train,
                  window_predict,
                  diff,
@@ -31,12 +30,7 @@ def process_data(net,
         else:
             net.eval()
 
-    if training:
-        # training mode
-        # iterate on the train dataset
-        t = tqdm(train_loader, ncols=100)
-    else:
-        t = tqdm(test_loader, ncols=100)
+    t = tqdm(loader, ncols=100)
 
     for batch in t:
         if pytorch:

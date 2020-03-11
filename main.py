@@ -217,29 +217,35 @@ def main():
             dict_loss = process_data(net=net,
                                      optimizer=optimizer,
                                      criterion=criterion,
-                                     train_loader=seq_train,
-                                     test_loader=seq_test,
+                                     loader=seq_train,
                                      window_train=args.window_train,
                                      window_predict=args.window_predict,
                                      diff=args.diff,
                                      cuda=args.cuda,
                                      pytorch=args.pytorch,
                                      training=True)
-            logger.info(f"{epoch}:train:{dict_loss['loss'],dict_loss['rms_']}")
-
 
             with torch.no_grad():
                 dict_loss = process_data(net=net,
                                          optimizer=optimizer,
                                          criterion=criterion,
-                                         train_loader=seq_train,
-                                         test_loader=seq_test,
+                                         loader=seq_train,
                                          window_train=args.window_train,
                                          window_predict=args.window_predict,
                                          diff=args.diff,
                                          cuda=args.cuda,
                                          pytorch=args.pytorch)
-            logger.info(f"{epoch}:test:{dict_loss['loss'],dict_loss['rms_']}")
+                logger.info(f"{epoch}:train:{dict_loss['loss'],dict_loss['rms_']}")
+                dict_loss = process_data(net=net,
+                                         optimizer=optimizer,
+                                         criterion=criterion,
+                                         loader=seq_test,
+                                         window_train=args.window_train,
+                                         window_predict=args.window_predict,
+                                         diff=args.diff,
+                                         cuda=args.cuda,
+                                         pytorch=args.pytorch)
+                logger.info(f"{epoch}:test:{dict_loss['loss'],dict_loss['rms_']}")
 
             # save the model in the end of each epoch
             if args.pytorch:
