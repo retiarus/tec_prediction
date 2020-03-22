@@ -123,6 +123,7 @@ def main():
         else:
             print_red("Error bad network")
             exit()
+        net.load_from_filename(os.path.join(args.target, f"state_dict_{args.model}_{args.window_train}_{args.window_predict}_{tool}_{args.data}.pth"))
 
         if args.cuda:
             net.cuda()
@@ -257,7 +258,7 @@ def main():
 
     print_blue("Loading model")
     if args.pytorch:
-        net.load_from_filename(os.path.join(args.target, "state_dict_{args.model}_{args.window_train}_{args.window_predict}_{tool}_{args.data}.pth"))
+        net.load_from_filename(os.path.join(args.target, f"state_dict_{args.model}_{args.window_train}_{args.window_predict}_{tool}_{args.data}.pth"))
 
         with torch.no_grad():
             dict_loss = process_data(net=net,
