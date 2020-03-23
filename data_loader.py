@@ -4,6 +4,7 @@ import pickle
 import numpy as np
 import pandas as pd
 import torch.utils.data as data
+import pdb
 
 
 class SequenceLoader(data.Dataset):
@@ -43,23 +44,27 @@ class SequenceLoader(data.Dataset):
 
     def load(self, index):
         while True:
-            index_start, index_end = self.samples[index]
+            try:
+                index_start, index_end = self.samples[index]
 
-            df_aux = self.df[index_start:index_end]
+                df_aux = self.df[index_start:index_end]
 
-            sample = np.zeros((int(self.seq_length_min / self.step_min), 1,
-                               self.shape[0], self.shape[1]))
-            for idx, aux in enumerate(df_aux.itertuples()):
-                if idx // self.step == 0:
-                    sample[idx, 0, :, :] = np.load(
-                        os.path.join(
-                            self.path_files,
-                            os.path.basename(aux.path).replace('txt', 'npy')))
+                sample = np.zeros((int(self.seq_length_min / self.step_min), 1,
+                                   self.shape[0], self.shape[1]))
+                for idx, aux in enumerate(df_aux.itertuples()):
+                    if idx // self.step == 0:
+                        sample[idx, 0, :, :] = np.load(
+                            os.path.join(
+                                self.path_files,
+                                os.path.basename(aux.path).replace('txt', 'npy')))
 
-            if np.any(np.isnan(sample)):
+                if np.any(np.isnan(sample)):
+                    index = np.random.choice(np.arange(0, self.__len__()))
+                else:
+                    break
+            except KeyError as e:
+                pdb.set_trace()
                 index = np.random.choice(np.arange(0, self.__len__()))
-            else:
-                break
 
         return sample.astype(np.float32), np.array([index])
 
