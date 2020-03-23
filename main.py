@@ -3,10 +3,10 @@ main file
 
 License is from https://github.com/aboulch/tec_prediction
 """
-import pdb
-import logging
 import argparse
+import logging
 import os
+import pdb
 
 from colors import print_blue, print_green, print_red
 from log_loss import log_loss
@@ -48,7 +48,8 @@ def main():
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
     handler = logging.FileHandler(
-        f'./log/{args.model}_{args.window_train}_{args.window_predict}_{tool}_{args.data}.log')
+        f'./log/{args.model}_{args.window_train}_{args.window_predict}_{tool}_{args.data}.log'
+    )
 
     format = logging.Formatter(f'%(levelname)s:%(message)s')
     handler.setFormatter(format)
@@ -123,7 +124,6 @@ def main():
         else:
             print_red("Error bad network")
             exit()
-        net.load_from_filename(os.path.join(args.target, f"state_dict_{args.model}_{args.window_train}_{args.window_predict}_{tool}_{args.data}.pth"))
 
         if args.cuda:
             net.cuda()
@@ -236,7 +236,8 @@ def main():
                                          diff=args.diff,
                                          cuda=args.cuda,
                                          pytorch=args.pytorch)
-                logger.info(f"{epoch}:train:{dict_loss['loss'],dict_loss['rms_']}")
+                logger.info(
+                    f"{epoch}:train:{dict_loss['loss'],dict_loss['rms_']}")
                 dict_loss = process_data(net=net,
                                          optimizer=optimizer,
                                          criterion=criterion,
@@ -246,19 +247,28 @@ def main():
                                          diff=args.diff,
                                          cuda=args.cuda,
                                          pytorch=args.pytorch)
-                logger.info(f"{epoch}:test:{dict_loss['loss'],dict_loss['rms_']}")
+                logger.info(
+                    f"{epoch}:test:{dict_loss['loss'],dict_loss['rms_']}")
 
             # save the model in the end of each epoch
             if args.pytorch:
-                torch.save(net.state_dict(),
-                           os.path.join(args.target, f"state_dict_{args.model}_{args.window_train}_{args.window_predict}_{tool}_{args.data}.pth"))
+                torch.save(
+                    net.state_dict(),
+                    os.path.join(
+                        args.target,
+                        f"state_dict_{args.model}_{args.window_train}_{args.window_predict}_{tool}_{args.data}.pth"
+                    ))
 
     # Test mode
     print_blue("TESTING")
 
     print_blue("Loading model")
     if args.pytorch:
-        net.load_from_filename(os.path.join(args.target, f"state_dict_{args.model}_{args.window_train}_{args.window_predict}_{tool}_{args.data}.pth"))
+        net.load_from_filename(
+            os.path.join(
+                args.target,
+                f"state_dict_{args.model}_{args.window_train}_{args.window_predict}_{tool}_{args.data}.pth"
+            ))
 
         with torch.no_grad():
             dict_loss = process_data(net=net,
