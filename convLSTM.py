@@ -43,14 +43,12 @@ class CLSTM_cell(nn.Module):
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.kernel_size = kernel_size
-        self.conv = nn.Conv2d(self.input_size + self.hidden_size,
-                              4 * self.hidden_size,
-                              self.kernel_size,
-                              1,
-                              padding=padding)
-
-
-#                              dilation=dilation)
+        self.conv = nn.Conv2d(in_channels=self.input_size + self.hidden_size,
+                              out_channels=4 * self.hidden_size,
+                              kernel_size=self.kernel_size,
+                              stride=1,
+                              padding=padding,
+                              dilation=dilation)
 
     def forward(self, input, prev_state=None):
         """Forward."""

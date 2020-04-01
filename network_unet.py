@@ -21,7 +21,6 @@ class UnetConvRecurrent(nn.Module):
         super(UnetConvRecurrent, self).__init__()
 
         self.act_cuda = act_cuda
-        input_size = 4
         kernel_size = 3
 
         self.conv11 = nn.Conv2d(input_nbr,
