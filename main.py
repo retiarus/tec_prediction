@@ -105,11 +105,11 @@ def main():
         seq_train = torch.utils.data.DataLoader(ds,
                                                 batch_size=args.batch_size,
                                                 shuffle=True,
-                                                num_workers=2)
+                                                num_workers=3)
         seq_test = torch.utils.data.DataLoader(ds_val,
                                                batch_size=args.batch_size,
                                                shuffle=False,
-                                               num_workers=2)
+                                               num_workers=3)
 
         print_blue("Creating network...")
         if args.model == "simple":
