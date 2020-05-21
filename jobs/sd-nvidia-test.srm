@@ -8,12 +8,10 @@
 #SBATCH --time=00:20:00          # Obrigatório
 #SBATCH --exclusive              # Utilização exclusiva dos nós durante a execução do job
 
-
 #Exibe os nós alocados para o Job
-echo $SLURM_JOB_NODELIST
 nodeset -e $SLURM_JOB_NODELIST
 
-workdir=$SLURM_SUBMIT_DIR
+workdir=/scratch/ampemi/pedro.santos2/tec_prediction
 cd $workdir
 
 . /scratch/ampemi/pedro.santos2/anaconda3/bin/activate
