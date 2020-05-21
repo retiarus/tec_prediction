@@ -2,8 +2,8 @@
 #SBATCH --nodes=1                #Número de Nós
 #SBATCH --ntasks-per-node=1      #Número de tarefas por Nó
 #SBATCH --ntasks=1               #Numero total de tarefas MPI
-#SBATCH --cpus-per-task=48            #Numero de threads
-#SBATCH -p sequana_gpu_dev       #Fila (partition) a ser utilizada
+#SBATCH --cpus-per-task=24       #Numero de threads
+#SBATCH -p nvidia_dev       #Fila (partition) a ser utilizada
 #SBATCH -J DevTrainNN   		     # Nome job
 #SBATCH --time=00:20:00          # Obrigatório
 #SBATCH --exclusive              # Utilização exclusiva dos nós durante a execução do job
@@ -17,9 +17,6 @@ wordir=$SLURM_SUBMIT_DIR
 
 . /scrach/aempi/pedro.santos2/anaconda3/bin/activate
 conda activate dscience
-
-## 1) Carrega o módulo sequana
-module load sequana/current
 
 # Full path to application + application name
 application="$(which python)"
