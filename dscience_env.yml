@@ -217,7 +217,6 @@ dependencies:
   - pyopenssl=19.1.0=py36_0
   - pyparsing=2.4.7=py_0
   - pyproj=1.9.6=py36h516909a_1002
-  - pypy3.6=7.3.0=h0b86377_0
   - pyqt=5.9.2=py36h05f1152_2
   - pyrsistent=0.16.0=py36h7b6447c_0
   - pysal=2.1.0=py_0
