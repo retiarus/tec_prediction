@@ -8,6 +8,8 @@ import logging
 import os
 import pdb
 
+import torch.nn as nn
+
 from colors import print_blue, print_green, print_red
 from log_loss import log_loss
 from process import process_data
@@ -79,7 +81,10 @@ def main():
 
         # Setting device on GPU if available, else CPU
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        print('Using device:', device)
+        if torch.cuda.device_count() > 1:
+            print("Let's use", torch.cuda.device_count(), "GPUs!")
+        else:
+            print('Using device:', device)
         print()
 
         # Additional Info when using cuda
@@ -125,6 +130,7 @@ def main():
             print_red("Error bad network")
             exit()
 
+        net = nn.DataParallel(net)
         if args.cuda:
             net.cuda()
 
