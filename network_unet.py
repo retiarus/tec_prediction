@@ -32,7 +32,7 @@ class UnetConvRecurrent(nn.Module):
         self.convRecurrentCell1 = Recurrent_cell(num_features,
                                                  num_features,
                                                  kernel_size,
-                                                 self.act_cuda)
+                                                 act_cuda=self.act_cuda)
 
         self.conv21 = nn.Conv2d(num_features,
                                 num_features,

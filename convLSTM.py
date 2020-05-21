@@ -32,7 +32,7 @@ class CLSTM_cell(nn.Module):
                  hidden_size,
                  kernel_size,
                  dilation=1,
-                 act_cuda=True,
+                 act_cuda=False,
                  padding=None):
         """Init."""
         super(CLSTM_cell, self).__init__()
@@ -48,7 +48,7 @@ class CLSTM_cell(nn.Module):
                               kernel_size=self.kernel_size,
                               stride=1,
                               padding=padding,
-                              dilation=dilation)
+                              dilation=(dilation, dilation))
 
     def forward(self, input, prev_state=None):
         """Forward."""
