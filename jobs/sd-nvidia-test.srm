@@ -3,11 +3,12 @@
 #SBATCH --ntasks-per-node=1      #Número de tarefas por Nó
 #SBATCH --ntasks=1               #Numero total de tarefas MPI
 #SBATCH --cpus-per-task=24       #Numero de threads
-#SBATCH -p nvidia_dev       #Fila (partition) a ser utilizada
+#SBATCH -p nvidia_dev            #Fila (partition) a ser utilizada
 #SBATCH -J DevTrainNN   		     # Nome job
 #SBATCH --time=00:20:00          # Obrigatório
 #SBATCH --exclusive              # Utilização exclusiva dos nós durante a execução do job
 
+###############################################################
 #Exibe os nós alocados para o Job
 nodeset -e $SLURM_JOB_NODELIST
 
@@ -21,7 +22,7 @@ conda activate dscience
 application="$(which python)"
 
 # Run options for the application
-options="$workdir/main.py --seq_length_min=7200 --step_min=30 --window_train=144 --window_predict=96 --batch_size=50 --epochs=100 --pytorch True --data scin  --source=/home/pedro/resized_type_1/"
+options="$workdir/main.py --seq_length_min=4320 --step_min=30 --window_train=96 --window_predict=48 --batch_size=50 --epochs=50 --pytorch True --data scin --model unet --source=/scratch/ampemi/pedro.santos2/resized_type_1 --cuda True"
 
 ###############################################################
 echo Running on host $(hostname)
