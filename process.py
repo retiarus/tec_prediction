@@ -84,7 +84,6 @@ def process_data(net,
                                       diff=diff,
                                       predict_diff_data=periodic_blur)
                 # compute error and backprocj
-                pdb.set_trace()
                 error = criterion(outputs, targets)
                 error.backward()
                 optimizer.step()
