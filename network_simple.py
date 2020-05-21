@@ -4,13 +4,12 @@ Simple network
 License is from https://github.com/aboulch/tec_prediction
 """
 
-import pdb
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from convLSTM import CLSTM_cell as Recurrent_cell
 
+import pdb
 torch.set_default_dtype(torch.float32)
 
 
@@ -78,11 +77,11 @@ class SimpleConvRecurrent(nn.Module):
 
         output_inner = []
         size = z.size()
-        seq_len = z.size(0)
+        seq_len = z.size(1)
         # hidden_state=self.convLSTM1.init_hidden(size[1])
         hidden_state = None
         for t in range(seq_len):  #loop for every step
-            x = z[t, ...]
+            x = z[:, t, ...]
 
             # coder
             x = F.relu(self.conv1(x))
@@ -105,7 +104,7 @@ class SimpleConvRecurrent(nn.Module):
         for t in range(prediction_len - 1):  #loop for every step
 
             if (diff):
-                x = y + predict_diff_data[t, ...]
+                x = y + predict_diff_data[:, t, ...]
             else:
                 x = y
 
@@ -127,9 +126,7 @@ class SimpleConvRecurrent(nn.Module):
 
             output_inner.append(y)
 
-        expected_size = (len(output_inner), z.size(1), z.size(2), z.size(3),
-                         z.size(4))
-        current_input = torch.cat(output_inner, 0).view(expected_size)
+        current_input = torch.stack(output_inner, 1)
 
         return current_input
 

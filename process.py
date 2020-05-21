@@ -52,6 +52,7 @@ def process_data(net,
 
             # smooth, blur np_periodic and generate the pytorch tensor
             np_periodic_blur = blur_array(np_periodic)
+            np_periodic_blur = np_periodic_blur.transpose((1, 0, 2, 3, 4))
             periodic_blur = torch.from_numpy(np_periodic_blur).float()
 
             if cuda:
@@ -64,6 +65,8 @@ def process_data(net,
                 np_targets_network = np_targets.copy()
 
             # create pytorch tensors for inputs and targets
+            np_inputs = np_inputs.transpose((1, 0, 2, 3, 4))
+            np_targets_network = np_targets_network.transpose((1, 0, 2, 3, 4))
             inputs = torch.from_numpy(np_inputs).float()
             targets = torch.from_numpy(np_targets_network).float()
 
@@ -81,6 +84,7 @@ def process_data(net,
                                       diff=diff,
                                       predict_diff_data=periodic_blur)
                 # compute error and backprocj
+                pdb.set_trace()
                 error = criterion(outputs, targets)
                 error.backward()
                 optimizer.step()
@@ -95,6 +99,7 @@ def process_data(net,
 
             # outputs
             np_outputs = outputs.cpu().data.numpy()
+            np_outputs = np_outputs.transpose((1, 0, 2, 3, 4))
 
             calc_errors.update_loss(float(error.cpu().detach().numpy()))
 

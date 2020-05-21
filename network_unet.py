@@ -100,7 +100,7 @@ class UnetConvRecurrent(nn.Module):
 
         output_inner = []
         size = z.size()
-        seq_len = z.size(0)
+        seq_len = z.size(1)
 
         hidden_state1 = None
         hidden_state2 = None
@@ -108,7 +108,7 @@ class UnetConvRecurrent(nn.Module):
         hidden_stated2 = None
         hidden_stated1 = None
         for t in range(seq_len):  # loop for every step
-            x = z[t, ...]
+            x = z[:, t, ...]
 
             # coder
             x1 = F.relu(self.conv11(x))
@@ -144,7 +144,7 @@ class UnetConvRecurrent(nn.Module):
         for t in range(prediction_len-1):
 
             if(diff):
-                x = y + predict_diff_data[t, ...]
+                x = y + predict_diff_data[:, t, ...]
             else:
                 x = y
 
@@ -179,9 +179,7 @@ class UnetConvRecurrent(nn.Module):
 
             output_inner.append(y)
 
-        expected_size = (len(output_inner), z.size(1), z.size(2),
-                         z.size(3), z.size(4))
-        current_input = torch.cat(output_inner, 0).view(expected_size)
+        current_input = torch.stack(output_inner, 1)
 
         return current_input
 

@@ -130,13 +130,11 @@ def main():
             print_red("Error bad network")
             exit()
 
-        net = nn.DataParallel(net)
         if args.cuda:
+            net = nn.DataParallel(net)
             net.cuda()
 
         print("PARAMTERS")
-
-        #    summary(net, (args.window_train, args.batch, 1, 72, 72))
 
         def count_parameters(model):
             return sum(p.numel() for p in model.parameters()
