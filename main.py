@@ -117,10 +117,10 @@ def main():
             net = SimpleConvRecurrent(1, act_cuda=args.cuda)
         elif args.model == "unet":
             from network_unet import UnetConvRecurrent
-            net = UnetConvRecurrent(1)
+            net = UnetConvRecurrent(1, act_cuda=args.cuda)
         elif args.model == "dilation121":
-            from network_dilation_121 import UnetConvRecurrent
-            net = UnetConvRecurrent(1)
+            from network_dilation_121 import DilationConvRecurrent
+            net = UnetConvRecurrent(1, act_cuda=args.cuda)
         else:
             print_red("Error bad network")
             exit()

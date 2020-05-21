@@ -10,11 +10,11 @@ import torch.nn.functional as F
 from convLSTM import CLSTM_cell as Recurrent_cell
 
 
-class UnetConvRecurrent(nn.Module):
+class DilationConvRecurrent(nn.Module):
     """Segnet network."""
     def __init__(self, input_nbr, num_features=8, act_cuda=False):
         """Init fields."""
-        super(UnetConvRecurrent, self).__init__()
+        super(DilationConvRecurrent, self).__init__()
 
         self.act_cuda = act_cuda
         kernel_size = 3
