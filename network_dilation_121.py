@@ -43,13 +43,13 @@ class DilationConvRecurrent(nn.Module):
         # Stage 1
 
         output_inner = []
-        seq_len = z.size(0)
+        seq_len = z.size(1)
 
         hidden_state1 = None
         hidden_state2 = None
         hidden_state3 = None
         for t in range(seq_len):  # loop for every step
-            x = z[t, ...]
+            x = z[:, t, ...]
 
             # coder
             x1 = x
@@ -73,7 +73,7 @@ class DilationConvRecurrent(nn.Module):
         for t in range(prediction_len - 1):
 
             if (diff):
-                x = y + predict_diff_data[t, ...]
+                x = y + predict_diff_data[:, t, ...]
             else:
                 x = y
 
@@ -96,9 +96,7 @@ class DilationConvRecurrent(nn.Module):
 
             output_inner.append(y)
 
-        expected_size = (len(output_inner), z.size(1), z.size(2), z.size(3),
-                         z.size(4))
-        current_input = torch.cat(output_inner, 0).view(expected_size)
+        current_input = torch.stack(output_inner, 1)
 
         return current_input
 
