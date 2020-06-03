@@ -2,10 +2,10 @@
 #SBATCH --nodes=1                #Número de Nós
 #SBATCH --ntasks-per-node=1      #Número de tarefas por Nó
 #SBATCH --ntasks=1               #Numero total de tarefas MPI
-#SBATCH --cpus-per-task=24       #Numero de threads
-#SBATCH -p gdl                   #Fila (partition) a ser utilizada
-#SBATCH -J DevTrainNN   		     # Nome job
-#SBATCH --time=00:20:00          # Obrigatório
+#SBATCH --cpus-per-task=48       #Numero de threads
+#SBATCH -p sequana_gpu_long           #Fila (partition) a ser utilizada
+#SBATCH -J DevTrainNN_1            # Nome job
+#SBATCH --time=744:00:00         # Obrigatório
 #SBATCH --exclusive              # Utilização exclusiva dos nós durante a execução do job
 
 ###############################################################
@@ -18,16 +18,13 @@ cd $workdir
 . /scratch/ampemi/pedro.santos2/anaconda3/bin/activate
 conda activate dscience
 
+module load sequana/current
+
 # Full path to application + application name
 application="$(which python)"
 
 # Run options for the application
-options="$workdir/main.py --seq_length_min=4320 --step_min=30 --window_train=96 --window_predict=48 --batch_size=50 --epochs=50 --pytorch True --data scin --model unet --source=/scratch/ampemi/pedro.santos2/resized_type_1 --cuda True"
-
-###############################################################
-
-#Configura o módulo de Deep Learning
-#module load deepl/deeplearn-py3.7
+options="$workdir/main.py --seq_length_min=7200 --step_min=30 --window_train=144 --window_predict=96 --batch_size=50 --epochs=50 --pytorch True --data scin --source=/scratch/ampemi/pedro.santos2/resized_type_1 --cuda True --model unet --work_loader=48"
 
 ###############################################################
 echo Running on host $(hostname)
@@ -37,6 +34,7 @@ echo Directory is $(pwd)
 echo Slurm job ID is $SLURM_JOB_ID
 echo This job runs on the following machines:
 echo $SLURM_JOB_NODELIST
+echo $options
 ###############################################################
 
 #configura o numero de threads, de acordo com o parametro definido no Slurm
@@ -44,4 +42,4 @@ export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 
 EXEC="$application $options"
 
-$EXEC
+srun  -N 1 -c $SLURM_CPUS_PER_TASK $EXEC

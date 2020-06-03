@@ -13,9 +13,10 @@
 echo $SLURM_JOB_NODELIST
 nodeset -e $SLURM_JOB_NODELIST
 
-wordir=$SLURM_SUBMIT_DIR
+workdir=/scratch/ampemi/pedro.santos2/tec_prediction
+cd $workdir
 
-. /scrach/aempi/pedro.santos2/anaconda3/bin/activate
+. /scratch/ampemi/pedro.santos2/anaconda3/bin/activate
 conda activate dscience
 
 ## 1) Carrega o módulo sequana
@@ -25,7 +26,7 @@ module load sequana/current
 application="$(which python)"
 
 # Run options for the application
-options="$workdir/main.py --seq_length_min=7200 --step_min=30 --window_train=144 --window_predict=96 --batch_size=50 --epochs=100 --pytorch True --data scin  --source=/home/pedro/resized_type_1/"
+options="$workdir/main.py --seq_length_min=4320 --step_min=30 --window_train=96 --window_predict=48 --batch_size=50 --epochs=50 --pytorch True --data scin  --source=/scratch/ampemi/pedro.santos2/resized_type_1/ --model unet --cuda True --work_loader=80"
 
 
 ###############################################################
@@ -37,6 +38,7 @@ echo Directory is $(pwd)
 echo Slurm job ID is $SLURM_JOB_ID
 echo This job runs on the following machines:
 echo $SLURM_JOB_NODELIST
+echo $options
 ###############################################################
 
 #configura o numero de threads, de acordo com o parametro definido no Slurm
