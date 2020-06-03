@@ -31,7 +31,7 @@ class CalcErrors:
 
         self._rms_global_mean = []
 
-    @njit(parallel=True)
+    @njit(parallel=True, cache=True, nopython=True)
     def __call__(self, np_outputs, np_periodic_blur, np_periodic, np_targets):
         if self.diff:
             # remove code associated with preprocess
@@ -106,7 +106,7 @@ class CalcErrors:
             self.window_predict, self._count)
 
 
-@njit(parallel=True)
+@njit(parallel=True, cache=True, nopython=True)
 def global_calc_errors(rms_global_mean, loss, rms_, rms_lattitude,
                        rms_periodic, rms_per_frame, rms_periodic_per_frame,
                        rms_per_sequence, rms_per_sequence_periodic,
