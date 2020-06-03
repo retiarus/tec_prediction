@@ -1,5 +1,6 @@
 import pdb
 
+from time import time
 import numpy as np
 
 from calc_errors import CalcErrors
@@ -31,9 +32,20 @@ def process_data(net,
             net.eval()
 
     t = tqdm(loader, ncols=100)
+    it_t = iter(t)
 
-    for batch in t:
+    size = t.total
+    print(size)
+    count = 0
+    while count < size:
+        count += 1
+        start = time()
+        batch = next(it_t)
+        end = time()
+        print(f'load: {end-start}' )
+
         if pytorch:
+            start = time()
             # preprocess the batch (TODO: go pytorch)
             # 1. disable preprocess, start to use relu or elu
             # batch_np = preprocess(batch[0].numpy().transpose((1,0,2,3,4)))
@@ -55,8 +67,6 @@ def process_data(net,
             np_periodic_blur = np_periodic_blur.transpose((1, 0, 2, 3, 4))
             periodic_blur = torch.from_numpy(np_periodic_blur).float()
 
-            if cuda:
-                periodic_blur = periodic_blur.cuda()
 
             # test for residual train
             if diff:  # use residual
@@ -69,13 +79,21 @@ def process_data(net,
             np_targets_network = np_targets_network.transpose((1, 0, 2, 3, 4))
             inputs = torch.from_numpy(np_inputs).float()
             targets = torch.from_numpy(np_targets_network).float()
+            end = time()
+            print(f'pre-processing: {end-start}' )
 
+            start = time()
             if cuda:
+                periodic_blur = periodic_blur.cuda()
                 inputs = inputs.cuda()
                 targets = targets.cuda()
+            end = time()
+            print(f'load to gpu: {end-start}' )
+
 
             # code for training and testing fase
             if training:
+                start = time()
                 # set gradients to zero
                 optimizer.zero_grad()
                 # forward pass in the network
@@ -87,6 +105,8 @@ def process_data(net,
                 error = criterion(outputs, targets)
                 error.backward()
                 optimizer.step()
+                end = time()
+                print(f'training: {end-start}' )
             else:  # testing
                 # forward pass in the network
                 outputs = net.forward(inputs,
