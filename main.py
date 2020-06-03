@@ -24,6 +24,7 @@ def main():
     parser.add_argument("--step_min", type=int, default=10)
     parser.add_argument("--window_train", type=int, default=432)
     parser.add_argument("--window_predict", type=int, default=288)
+    parser.add_argument("--work_loader", type=int, default=40)
     parser.add_argument("--batch_size",
                         type=int,
                         default=50,
@@ -110,11 +111,11 @@ def main():
         seq_train = torch.utils.data.DataLoader(ds,
                                                 batch_size=args.batch_size,
                                                 shuffle=True,
-                                                num_workers=2)
+                                                num_workers=args.work_loader)
         seq_test = torch.utils.data.DataLoader(ds_val,
                                                batch_size=args.batch_size,
                                                shuffle=False,
-                                               num_workers=2)
+                                               num_workers=args.work_loader)
 
         print_blue("Creating network...")
         if args.model == "simple":
@@ -125,7 +126,7 @@ def main():
             net = UnetConvRecurrent(1, act_cuda=args.cuda)
         elif args.model == "dilation121":
             from network_dilation_121 import DilationConvRecurrent
-            net = UnetConvRecurrent(1, act_cuda=args.cuda)
+            net = DilationConvRecurrent(1, act_cuda=args.cuda)
         else:
             print_red("Error bad network")
             exit()
@@ -229,19 +230,9 @@ def main():
                                      cuda=args.cuda,
                                      pytorch=args.pytorch,
                                      training=True)
+            logger.info(f"{epoch}:train:{dict_loss['loss'],dict_loss['rms_']}")
 
             with torch.no_grad():
-                dict_loss = process_data(net=net,
-                                         optimizer=optimizer,
-                                         criterion=criterion,
-                                         loader=seq_train,
-                                         window_train=args.window_train,
-                                         window_predict=args.window_predict,
-                                         diff=args.diff,
-                                         cuda=args.cuda,
-                                         pytorch=args.pytorch)
-                logger.info(
-                    f"{epoch}:train:{dict_loss['loss'],dict_loss['rms_']}")
                 dict_loss = process_data(net=net,
                                          optimizer=optimizer,
                                          criterion=criterion,
