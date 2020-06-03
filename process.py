@@ -1,6 +1,6 @@
 import pdb
-
 from time import time
+
 import numpy as np
 
 from calc_errors import CalcErrors
@@ -42,7 +42,7 @@ def process_data(net,
         start = time()
         batch = next(it_t)
         end = time()
-        print(f'load: {end-start}' )
+        time_load = end-start
 
         if pytorch:
             start = time()
@@ -80,15 +80,15 @@ def process_data(net,
             inputs = torch.from_numpy(np_inputs).float()
             targets = torch.from_numpy(np_targets_network).float()
             end = time()
-            print(f'pre-processing: {end-start}' )
+            time_preprocessing = end-start
 
-            start = time()
             if cuda:
+                start = time()
                 periodic_blur = periodic_blur.cuda()
                 inputs = inputs.cuda()
                 targets = targets.cuda()
-            end = time()
-            print(f'load to gpu: {end-start}' )
+                end = time()
+                time_load_to_gpu = end-start
 
 
             # code for training and testing fase
@@ -106,7 +106,7 @@ def process_data(net,
                 error.backward()
                 optimizer.step()
                 end = time()
-                print(f'training: {end-start}' )
+                time_training = end-start
             else:  # testing
                 # forward pass in the network
                 outputs = net.forward(inputs,
@@ -162,7 +162,10 @@ def process_data(net,
         # upd#ate TQDM
         t.set_postfix(Loss=calc_errors.get_loss(),
                       RMS=calc_errors.get_rms(),
-                      RMS_P=calc_errors.get_rms_periodic())
+                      RMS_P=calc_errors.get_rms_periodic(),
+                      time_load=time_load,
+                      time_preprocessing=time_preprocessing,
+                      time_training=time_training)
 
     dict_loss = calc_errors.calc_errors()
     return dict_loss
