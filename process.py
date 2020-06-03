@@ -156,7 +156,7 @@ def process_data(net,
             # update loss
             calc_errors.update_loss(error)
 
-        calc_errors(np_outputs, np_periodic_blur, np_periodic, np_targets)
+        calc_errors(np_outputs, None, np_periodic, np_targets)
 
         # upd#ate TQDM
         t.set_postfix(Loss=calc_errors.get_loss(),
