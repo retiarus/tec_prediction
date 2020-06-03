@@ -52,8 +52,8 @@ class SequenceLoader(data.Dataset):
                 sample = np.zeros((int(self.seq_length_min / self.step_min), 1,
                                    self.shape[0], self.shape[1]))
                 for idx, aux in enumerate(df_aux.itertuples()):
-                    if idx // self.step == 0:
-                        sample[idx, 0, :, :] = np.load(
+                    if idx % self.step == 0:
+                        sample[idx // self.step, 0, :, :] = np.load(
                             os.path.join(
                                 self.path_files,
                                 os.path.basename(aux.path).replace('txt', 'npy')))
