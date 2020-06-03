@@ -12,6 +12,7 @@ from colors import print_blue, print_green, print_red
 from log_loss import log_loss
 from parallel import DataParallelCriterion, DataParallelModel
 from process import process_data
+from torch.nn.parallel.data_parallel import DataParallel
 
 
 def main():
@@ -131,7 +132,7 @@ def main():
             exit()
 
         if args.cuda:
-            net = DataParallelModel(net)
+            net = DataParallel(net)
             net.cuda()
 
         print("PARAMTERS")
@@ -147,8 +148,8 @@ def main():
 
         print_blue("Setting up the criterion...")
         criterion = torch.nn.L1Loss()
-        if args.cuda:
-            criterion  = DataParallelCriterion(criterion)
+#        if args.cuda:
+#            criterion  = DataParallelCriterion(criterion)
 
     else:
         import tensorflow as tf

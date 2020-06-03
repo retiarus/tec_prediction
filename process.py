@@ -62,17 +62,16 @@ def process_data(net,
             # struct from data
             np_periodic = get_periodic(np_inputs, window_predict)
 
-            # smooth, blur np_periodic and generate the pytorch tensor
-            np_periodic_blur = blur_array(np_periodic)
-            np_periodic_blur = np_periodic_blur.transpose((1, 0, 2, 3, 4))
-            periodic_blur = torch.from_numpy(np_periodic_blur).float()
-
-
-            # test for residual train
+            # residual train
             if diff:  # use residual
+                # smooth, blur np_periodic and generate the pytorch tensor
+                np_periodic_blur = blur_array(np_periodic)
+                np_periodic_blur = np_periodic_blur.transpose((1, 0, 2, 3, 4))
+                periodic_blur = torch.from_numpy(np_periodic_blur).float()
                 np_targets_network = np_targets - np_periodic_blur
             else:
                 np_targets_network = np_targets.copy()
+                periodic_blur = None
 
             # create pytorch tensors for inputs and targets
             np_inputs = np_inputs.transpose((1, 0, 2, 3, 4))
