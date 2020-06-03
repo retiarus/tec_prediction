@@ -82,9 +82,10 @@ def process_data(net,
 
             if cuda:
                 start = time()
-                periodic_blur = periodic_blur.cuda()
                 inputs = inputs.cuda()
                 targets = targets.cuda()
+                if diff:
+                    periodic_blur = periodic_blur.cuda()
                 end = time()
                 time_load_to_gpu = end-start
 
