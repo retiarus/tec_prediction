@@ -57,13 +57,12 @@ def process_data(net,
             # count number of prediction images
             calc_errors.update_count(batch[0].size(0) * window_predict)
 
-            # select window_predict elements from the end of np_input
-            # this last elements will have some information about the periodic
-            # struct from data
-            np_periodic = get_periodic(np_inputs, window_predict)
-
             # residual train
             if diff:  # use residual
+                # select window_predict elements from the end of np_input
+                # this last elements will have some information about the periodic
+                # struct from data
+                np_periodic = get_periodic(np_inputs, window_predict)
                 # smooth, blur np_periodic and generate the pytorch tensor
                 np_periodic_blur = blur_array(np_periodic)
                 np_periodic_blur = np_periodic_blur.transpose((1, 0, 2, 3, 4))
