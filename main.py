@@ -147,7 +147,7 @@ def main():
 
         print_blue("Setting up the criterion...")
         criterion = torch.nn.L1Loss()
-        if args.cuda():
+        if args.cuda:
             criterion  = DataParallelCriterion(criterion)
 
     else:
