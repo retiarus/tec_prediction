@@ -1,7 +1,6 @@
 import numpy as np
 
 from metrics import rms
-from numba import njit, prange
 
 
 class CalcErrors:
@@ -31,7 +30,6 @@ class CalcErrors:
 
         self._rms_global_mean = []
 
-    @njit(parallel=True, cache=True, nopython=True)
     def __call__(self, np_outputs, np_periodic_blur, np_periodic, np_targets):
         if self.diff:
             # remove code associated with preprocess
@@ -65,7 +63,7 @@ class CalcErrors:
                                    self._weights[None, None, None, :, :]).sum(
                                        axis=(2, 3, 4))
         rms_gm = self._rms_gm.transpose(1, 0)
-        for i in prange(rms_gm.shape[0]):
+        for i in range(rms_gm.shape[0]):
             self._rms_global_mean.append(rms_gm[i])
 
         # update global rms
@@ -73,12 +71,12 @@ class CalcErrors:
         self._rms_periodic += rms_tec_images_periodic.sum()
 
         # update rms per seq frame
-        for frame_id in prange(self.window_predict):
+        for frame_id in range(self.window_predict):
             self._rms_per_frame[frame_id] += rms_tec_images[frame_id].sum()
             self._rms_periodic_per_frame[frame_id] += rms_tec_images_periodic[
                 frame_id].sum()
 
-        for seq_id in prange(rms_tec_images.shape[1]):
+        for seq_id in range(rms_tec_images.shape[1]):
             self._rms_per_sequence.append(rms_tec_images[:, seq_id].mean())
             self._rms_per_sequence_periodic.append(
                 rms_tec_images_periodic[:, seq_id].mean())
@@ -106,7 +104,6 @@ class CalcErrors:
             self.window_predict, self._count)
 
 
-@njit(parallel=True, cache=True, nopython=True)
 def global_calc_errors(rms_global_mean, loss, rms_, rms_lattitude,
                        rms_periodic, rms_per_frame, rms_periodic_per_frame,
                        rms_per_sequence, rms_per_sequence_periodic,
@@ -120,7 +117,7 @@ def global_calc_errors(rms_global_mean, loss, rms_, rms_lattitude,
     rms_ = rms_ / count
     rms_lattitude = rms_lattitude / count
     rms_periodic = rms_periodic / count
-    for frame_id in prange(window_predict):
+    for frame_id in range(window_predict):
         rms_per_frame[frame_id] /= count / window_predict
         rms_periodic_per_frame[frame_id] /= count / window_predict
 
