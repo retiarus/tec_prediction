@@ -31,7 +31,7 @@ def process_data(net,
         else:
             net.eval()
 
-    t = tqdm(loader, ncols=100)
+    t = tqdm(loader, ncols=140)
     it_t = iter(t)
 
     size = t.total
@@ -163,9 +163,9 @@ def process_data(net,
         t.set_postfix(Loss=calc_errors.get_loss(),
                       RMS=calc_errors.get_rms(),
                       RMS_P=calc_errors.get_rms_periodic(),
-                      time_load=time_load,
-                      time_preprocessing=time_preprocessing,
-                      time_training=time_training)
+                      t_load=time_load,
+                      t_pre=time_preprocessing,
+                      t_train=time_training)
 
     dict_loss = calc_errors.calc_errors()
     return dict_loss
