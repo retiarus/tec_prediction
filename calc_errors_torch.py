@@ -3,19 +3,25 @@ import pdb
 import numpy as np
 
 import torch
+import torch.nn as nn
 from metrics import rms as np_rms
 from metrics_torch import rms
 from torch import Tensor, mean, sum
 
+torch.set_default_dtype(torch.float32)
 
-class CalcErrors:
-    def __init__(self, window_predict):
+class CalcErrors(nn.Module):
+    def __init__(self, window_predict, batch_size=50, act_cuda=False):
         # initialize local copy of parameters
+        super(CalcErrors, self).__init__()
         self.window_predict = window_predict
 
-        self._weights = self.generate_weights().cuda()
+        self._weights = self.generate_weights()
+        if act_cuda:
+            self._weights = self._weights.cuda()
 
         # prepare loss
+        self.batch_size = batch_size
         self._loss = 0
         self._rms_ = 0
         self._rms_per_frame = Tensor(np.zeros(self.window_predict))
@@ -23,9 +29,13 @@ class CalcErrors:
         self._count = 0
         self._rms_latitude = Tensor(np.zeros(72))
 
-        self._rms_global_mean = []
+#        self._rms_global_mean = Tensor(np.zeros(self.batch_size))
 
+        self._rms_global_mean = []
     def __call__(self, outputs, targets):
+        self.forward(outputs, targets)
+
+    def forward(self, outputs, targets):
         with torch.no_grad():
             # compute the rms for each image
             rms_tec_images_latitude = rms(outputs - targets, dim=(-3, -1)).cpu()
@@ -35,6 +45,7 @@ class CalcErrors:
 
             self._rms_gm = sum((outputs - targets) * self._weights[None, None, None, :, :], dim=(-3, -2, -1)).cpu()
 
+#            self._rms_global_mean += sum(self._rms_gm**2.0, dim=0)
             for i in range(self._rms_gm.shape[0]):
                 self._rms_global_mean.append(self._rms_gm[i].detach().numpy())
 

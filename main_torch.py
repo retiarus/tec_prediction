@@ -7,6 +7,7 @@ import argparse
 import logging
 import os
 import pdb
+import subprocess
 
 from colors import print_blue, print_green, print_red
 from log_loss import log_loss
@@ -40,6 +41,11 @@ def main():
                         help="target directory")
     parser.add_argument("--source", type=str, help="source directory")
     args = parser.parse_args()
+
+    env = os.environ.copy()
+    env["PATH"] = "/var/lib/jupyterhub/anaconda/envs/dscience/bin" + ":"  + env["PATH"]
+    #env["PATH"] = "/scratch/ampemi/pedro.santos2/anaconda3/envs/dscience/bin" + ":"  + env["PATH"]
+    subprocess.Popen(["redis-server", "./redis.conf"], env=env)
 
     if args.pytorch:
         tool = 'pytorch'
@@ -127,6 +133,7 @@ def main():
             exit()
 
         if args.cuda:
+            net = DataParallel(net)
             net.cuda()
 
         print("PARAMTERS")

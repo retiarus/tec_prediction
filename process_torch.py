@@ -19,7 +19,12 @@ def process_data(net,
                  cuda,
                  pytorch,
                  training=False):
-    calc_errors = CalcErrors(window_predict)
+
+    # implement calc_erros as network layer to get improvement in performance
+    calc_errors = CalcErrors(window_predict, act_cuda=cuda)
+    if cuda:
+        calc_errors = DataParallel(calc_errors)
+    calc_errors.eval()
 
     if pytorch:
         import torch
