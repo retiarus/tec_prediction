@@ -22,6 +22,7 @@ def main():
     parser.add_argument("--step_min", type=int, default=10)
     parser.add_argument("--window_train", type=int, default=432)
     parser.add_argument("--window_predict", type=int, default=288)
+    parser.add_argument("--work_loader", type=int, default=40)
     parser.add_argument("--batch_size",
                         type=int,
                         default=50,
@@ -105,11 +106,11 @@ def main():
         seq_train = torch.utils.data.DataLoader(ds,
                                                 batch_size=args.batch_size,
                                                 shuffle=True,
-                                                num_workers=2, pin_memory=True)
+                                                num_workers=args.work_loader)
         seq_test = torch.utils.data.DataLoader(ds_val,
                                                batch_size=args.batch_size,
                                                shuffle=False,
-                                               num_workers=2, pin_memory=True)
+                                               num_workers=args.work_loader)
 
         print_blue("Creating network...")
         if args.model == "simple":
@@ -117,7 +118,7 @@ def main():
             net = SimpleConvRecurrent(1, act_cuda=args.cuda)
         elif args.model == "unet":
             from network_unet import UnetConvRecurrent
-            net = UnetConvRecurrent(1)
+            net = UnetConvRecurrent(1, act_cuda=args.cuda)
         elif args.model == "dilation121":
             from network_dilation_121 import UnetConvRecurrent
             net = UnetConvRecurrent(1)

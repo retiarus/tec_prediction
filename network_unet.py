@@ -41,7 +41,8 @@ class UnetConvRecurrent(nn.Module):
                                 stride=2)
         self.convRecurrentCell2 = Recurrent_cell(num_features,
                                                  num_features,
-                                                 kernel_size)
+                                                 kernel_size,
+                                                 act_cuda=self.act_cuda)
 
         self.conv31 = nn.Conv2d(num_features,
                                 num_features,
@@ -50,7 +51,8 @@ class UnetConvRecurrent(nn.Module):
                                 stride=2)
         self.convRecurrentCell3 = Recurrent_cell(num_features,
                                                  num_features,
-                                                 kernel_size)
+                                                 kernel_size,
+                                                 act_cuda=self.act_cuda)
 
         self.convd21 = nn.ConvTranspose2d(num_features,
                                           num_features,
@@ -65,7 +67,8 @@ class UnetConvRecurrent(nn.Module):
 
         self.convRecurrentCelld2 = Recurrent_cell(num_features,
                                                   num_features,
-                                                  kernel_size)
+                                                  kernel_size,
+                                                  act_cuda=self.act_cuda)
 
         self.convd11 = nn.ConvTranspose2d(num_features,
                                           num_features,
@@ -80,7 +83,8 @@ class UnetConvRecurrent(nn.Module):
                                           padding=1)
         self.convRecurrentCelld1 = Recurrent_cell(num_features,
                                                   num_features,
-                                                  kernel_size)
+                                                  kernel_size,
+                                                  act_cuda=self.act_cuda)
 
         self.convd1 = nn.ConvTranspose2d(num_features,
                                          num_features,

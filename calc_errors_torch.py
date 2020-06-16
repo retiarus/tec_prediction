@@ -13,7 +13,7 @@ class CalcErrors:
         # initialize local copy of parameters
         self.window_predict = window_predict
 
-        self._weights = self.generate_weights()
+        self._weights = self.generate_weights().cuda()
 
         # prepare loss
         self._loss = 0
@@ -28,15 +28,15 @@ class CalcErrors:
     def __call__(self, outputs, targets):
         with torch.no_grad():
             # compute the rms for each image
-            rms_tec_images_latitude = rms(outputs - targets, dim=(-3, -1))
-            rms_tec_images = rms(rms_tec_images_latitude, dim=-1)
+            rms_tec_images_latitude = rms(outputs - targets, dim=(-3, -1)).cpu()
+            rms_tec_images = rms(rms_tec_images_latitude, dim=-1).cpu()
 
             self._rms_latitude += sum(rms_tec_images_latitude, dim=(0, 1))
 
-            self._rms_gm = sum((outputs - targets) * self._weights[None, None, None, :, :], dim=(-3, -2, -1))
+            self._rms_gm = sum((outputs - targets) * self._weights[None, None, None, :, :], dim=(-3, -2, -1)).cpu()
 
             for i in range(self._rms_gm.shape[0]):
-                self._rms_global_mean.append(self._rms_gm[i].cpu().detach().numpy())
+                self._rms_global_mean.append(self._rms_gm[i].detach().numpy())
 
             # update global rms
             self._rms_ += sum(rms_tec_images)

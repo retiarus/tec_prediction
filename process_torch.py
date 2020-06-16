@@ -52,6 +52,7 @@ def process_data(net,
             if cuda:
                 start = time()
                 inputs = inputs.cuda()
+                targets_aux = targets
                 targets = targets.cuda()
                 if diff:
                     periodic_blur = periodic_blur.cuda()
