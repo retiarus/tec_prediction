@@ -93,7 +93,6 @@ def process_data(net,
 
             # code for training and testing fase
             if training:
-                start = time()
                 # set gradients to zero
                 optimizer.zero_grad()
                 # forward pass in the network
@@ -106,7 +105,6 @@ def process_data(net,
                 error.backward()
                 optimizer.step()
                 end = time()
-                time_training = end-start
             else:  # testing
                 # forward pass in the network
                 outputs = net.forward(inputs,
@@ -164,8 +162,7 @@ def process_data(net,
                       RMS=calc_errors.get_rms(),
                       RMS_P=calc_errors.get_rms_periodic(),
                       t_load=time_load,
-                      t_pre=time_preprocessing,
-                      t_train=time_training)
+                      t_pre=time_preprocessing)
 
     dict_loss = calc_errors.calc_errors()
     return dict_loss
