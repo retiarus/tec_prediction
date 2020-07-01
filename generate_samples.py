@@ -4,9 +4,8 @@ import pickle
 from datetime import datetime, timedelta
 
 import numpy as np
-import psycopg2
-
 import pandas as pd
+import psycopg2
 
 # from colors import print_blue, print_green, print_red
 
@@ -84,8 +83,13 @@ def generate_data(data):
                 f"where data_scintillationmap.resized = True " \
                 f"order by data_scintillationmap.index_datetime;"
     elif data == 'tec+scin':
-        query = f"select data_file, index_datetime from data_tecmap " \
-                f"where data_tecmap.resized = True " \
+        query = f"select data_tecmap.path, data_scintillationmap.path, " \
+                f"data_scintillationmap.index_datetime from data_tecmap " \
+                f"inner join data_scintillationmap on data_" \
+                f"tecmap.index_datetime = " \
+                f"data_scintillationmap.index_datetime where " \
+                f"data_scintillationmap.resized = True and " \
+                f"data_tecmap.resized = True " \
                 f"order by data_tecmap.index_datetime;"
     else:
         print('No valid data choiced.')
