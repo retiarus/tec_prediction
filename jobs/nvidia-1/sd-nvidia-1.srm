@@ -2,15 +2,14 @@
 #SBATCH --nodes=1                #Número de Nós
 #SBATCH --ntasks-per-node=1      #Número de tarefas por Nó
 #SBATCH --ntasks=1               #Numero total de tarefas MPI
-#SBATCH --cpus-per-task=48            #Numero de threads
-#SBATCH -p sequana_gpu_dev       #Fila (partition) a ser utilizada
-#SBATCH -J DevTrainNN   		     # Nome job
-#SBATCH --time=00:20:00          # Obrigatório
+#SBATCH --cpus-per-task=24       #Numero de threads
+#SBATCH -p nvidia_long           #Fila (partition) a ser utilizada
+#SBATCH -J DevTrainNN            # Nome job
+#SBATCH --time 744:00:00         # Obrigatório
 #SBATCH --exclusive              # Utilização exclusiva dos nós durante a execução do job
 
-
+###############################################################
 #Exibe os nós alocados para o Job
-echo $SLURM_JOB_NODELIST
 nodeset -e $SLURM_JOB_NODELIST
 
 workdir=/scratch/ampemi/pedro.santos2/tec_prediction
@@ -19,18 +18,13 @@ cd $workdir
 . /scratch/ampemi/pedro.santos2/anaconda3/bin/activate
 conda activate dscience
 
-## 1) Carrega o módulo sequana
-module load sequana/current
-
 # Full path to application + application name
 application="$(which python)"
 
 # Run options for the application
-options="$workdir/main_torch.py --seq_length_min=7200 --step_min=10 --window_train=432 --window_predict=288 --batch_size=50 --epochs=50 --pytorch True --data scin  --source=/scratch/ampemi/pedro.santos2/resized_type_1/ --model unet --cuda True --work_loader=24"
-
+options="$workdir/main_torch.py --seq_length_min=4320 --step_min=30 --window_train=96 --window_predict=48 --batch_size=50 --epochs=50 --pytorch True --data scin --model unet --source=/scratch/ampemi/pedro.santos2/resized_type_1 --cuda True --work_loader=4"
 
 ###############################################################
-cd $workdir
 echo Running on host $(hostname)
 echo Path is $PATH
 echo Time is $(date)
@@ -38,7 +32,6 @@ echo Directory is $(pwd)
 echo Slurm job ID is $SLURM_JOB_ID
 echo This job runs on the following machines:
 echo $SLURM_JOB_NODELIST
-echo $options
 ###############################################################
 
 #configura o numero de threads, de acordo com o parametro definido no Slurm

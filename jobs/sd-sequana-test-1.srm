@@ -26,7 +26,7 @@ module load sequana/current
 application="$(which python)"
 
 # Run options for the application
-options="$workdir/main_torch.py --seq_length_min=7200 --step_min=10 --window_train=432 --window_predict=288 --batch_size=50 --epochs=50 --pytorch True --data scin  --source=/scratch/ampemi/pedro.santos2/resized_type_1/ --model unet --cuda True --work_loader=24"
+options="$workdir/main_torch.py --seq_length_min=7200 --step_min=10 --window_train=432 --window_predict=288 --batch_size=50 --epochs=50 --pytorch True --data scin  --source=/scratch/ampemi/pedro.santos2/resized_type_1/ --model unet --cuda True --work_loader=20"
 
 
 ###############################################################
