@@ -13,6 +13,7 @@ from colors import print_blue, print_green, print_red
 from log_loss import log_loss
 from process_torch import process_data
 
+from torch.nn.parallel.data_parallel import DataParallel
 
 def main():
     parser = argparse.ArgumentParser()
@@ -43,8 +44,8 @@ def main():
     args = parser.parse_args()
 
     env = os.environ.copy()
-    env["PATH"] = "/var/lib/jupyterhub/anaconda/envs/dscience/bin" + ":"  + env["PATH"]
-    #env["PATH"] = "/scratch/ampemi/pedro.santos2/anaconda3/envs/dscience/bin" + ":"  + env["PATH"]
+    #env["PATH"] = "/var/lib/jupyterhub/anaconda/envs/dscience/bin" + ":"  + env["PATH"]
+    env["PATH"] = "/scratch/ampemi/pedro.santos2/anaconda3/envs/dscience/bin" + ":"  + env["PATH"]
     subprocess.Popen(["redis-server", "./redis.conf"], env=env)
 
     if args.pytorch:
@@ -112,11 +113,13 @@ def main():
         seq_train = torch.utils.data.DataLoader(ds,
                                                 batch_size=args.batch_size,
                                                 shuffle=True,
-                                                num_workers=args.work_loader)
+                                                num_workers=args.work_loader,
+                                                pin_memory=True)
         seq_test = torch.utils.data.DataLoader(ds_val,
                                                batch_size=args.batch_size,
                                                shuffle=False,
-                                               num_workers=args.work_loader)
+                                               num_workers=args.work_loader,
+                                               pin_memory=True)
 
         print_blue("Creating network...")
         if args.model == "simple":

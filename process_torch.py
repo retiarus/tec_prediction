@@ -8,6 +8,7 @@ from metrics_torch import rms
 from pre_processing import blur_array, get_input_targets, get_periodic
 from tqdm import tqdm
 
+from torch.nn.parallel.data_parallel import DataParallel
 
 def process_data(net,
                  optimizer,
@@ -22,8 +23,8 @@ def process_data(net,
 
     # implement calc_erros as network layer to get improvement in performance
     calc_errors = CalcErrors(window_predict, act_cuda=cuda)
-    if cuda:
-        calc_errors = DataParallel(calc_errors)
+#    if cuda:
+#        calc_errors = DataParallel(calc_errors)
     calc_errors.eval()
 
     if pytorch:
