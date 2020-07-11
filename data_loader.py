@@ -44,6 +44,8 @@ class SequenceLoader(data.Dataset):
         else:
             raise Exception(f'No valid df and samples list find in {file}')
 
+        self.samples = self.samples[0:1000]
+
     def load(self, index):
         r = redis.Redis(host="localhost")
         try:
