@@ -61,8 +61,6 @@ class SequenceLoader(data.Dataset):
         else:
             raise Exception(f'No valid df and samples list find in {file}')
 
-        self.samples = self.samples[0:1000]
-
     def load(self, index):
         r = Redis(host="localhost")
         try:
@@ -137,7 +135,11 @@ class SequenceLoader(data.Dataset):
             return
         else:
             a = np.frombuffer(a_byte, dtype=self.dtype)
-            return a.astype(self.dtype).reshape(self.shape)
+            try:
+                aux = a.astype(self.dtype).reshape(self.shape)
+                return aux
+            except ValueError as e:
+                return
 
     def __getitem__(self, index):
         """Get item."""
