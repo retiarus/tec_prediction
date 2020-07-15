@@ -3,4 +3,6 @@
 .vim/*
 __pycache__/*
 
+*.h5
+
 tags

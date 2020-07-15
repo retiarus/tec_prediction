@@ -12,8 +12,8 @@ import subprocess
 from colors import print_blue, print_green, print_red
 from log_loss import log_loss
 from process_torch import process_data
-
 from torch.nn.parallel.data_parallel import DataParallel
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -121,16 +121,21 @@ def main():
                                                num_workers=args.work_loader,
                                                pin_memory=True)
 
+        if args.data == "tec+scin":
+            num_channels = 2
+        else:
+            num_channels = 1
+
         print_blue("Creating network...")
         if args.model == "simple":
             from network_simple import SimpleConvRecurrent
-            net = SimpleConvRecurrent(1, act_cuda=args.cuda)
+            net = SimpleConvRecurrent(num_channels, act_cuda=args.cuda)
         elif args.model == "unet":
             from network_unet import UnetConvRecurrent
-            net = UnetConvRecurrent(1, act_cuda=args.cuda)
+            net = UnetConvRecurrent(num_channels, act_cuda=args.cuda)
         elif args.model == "dilation121":
-            from network_dilation_121 import UnetConvRecurrent
-            net = UnetConvRecurrent(1)
+            from network_dilation_121 import DilationConvRecurrent
+            net = DilationConvRecurrent(num_channels, act_cuda=args.cuda)
         else:
             print_red("Error bad network")
             exit()
