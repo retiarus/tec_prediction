@@ -6,9 +6,9 @@ import numpy as np
 from calc_errors_torch import CalcErrors
 from metrics_torch import rms
 from pre_processing import blur_array, get_input_targets, get_periodic
+from torch.nn.parallel.data_parallel import DataParallel
 from tqdm import tqdm
 
-from torch.nn.parallel.data_parallel import DataParallel
 
 def process_data(net,
                  optimizer,
@@ -19,6 +19,7 @@ def process_data(net,
                  diff,
                  cuda,
                  pytorch,
+                 tb=None,
                  training=False):
 
     # implement calc_erros as network layer to get improvement in performance
@@ -66,7 +67,8 @@ def process_data(net,
                 time_load_to_gpu = end-start
 
             # count number of prediction images
-            calc_errors.update_count(batch[0].size(0) * window_predict)
+            calc_errors.update_count(batch[0].size(0))
+            #calc_errors.update_count(batch[0].size(0) * window_predict)
 
             # residual train
             if diff:  # use residual
@@ -151,7 +153,8 @@ def process_data(net,
         t.set_postfix(Loss=calc_errors.get_loss(),
                       RMS=calc_errors.get_rms(),
                       t_load=time_load,
-                      t_pre=time_preprocessing)
+                      t_pre=time_preprocessing,
+                      loss_local=float(error.cpu().detach().numpy())/50)
 
     dict_loss = calc_errors.calc_errors()
     return dict_loss

@@ -5,9 +5,11 @@ from tensorflow.keras.layers import Conv2D, Conv2DTranspose, ZeroPadding2D
 
 tf.keras.backend.set_floatx('float32')
 
+def swish(x):
+    return x * F.sigmoid(x)
 
 class SimpleConvRecurrent(Model):
-    def __init__(self, input_nbr, num_map_features=16, diff=False):
+    def __init__(self, input_nbr, num_map_features=128, diff=False):
         super(SimpleConvRecurrent, self).__init__()
         self.diff = False
 
@@ -32,6 +34,9 @@ class SimpleConvRecurrent(Model):
                             kernel_size=1,
                             padding='valid',
                             data_format='channels_first')
+
+        self.preserved2 = torch.Variable(torch.ones(1), requires_grad=True)
+        self.layer_norm2 = torch.nn.LayerNorm(normalized_shape=(1, 3, 4))
 
         kernel_size = 3
         self.conv_recurrent_cell = RecurrentCell(num_map_features,
@@ -83,6 +88,8 @@ class SimpleConvRecurrent(Model):
             z = tf.nn.relu(self.conv3(z))
             z = tf.nn.relu(self.conv4(z))
 
+            z = self.layer_norm2(z) + self.preserved2(z)
+
             hidden_state = self.conv_recurrent_cell(z)
 
             y = hidden_state[0]
@@ -109,6 +116,8 @@ class SimpleConvRecurrent(Model):
             z = self.padding(z)
             z = tf.nn.relu(self.conv3(z))
             z = tf.nn.relu(self.conv4(z))
+
+            z = self.layer_norm2(z) + self.preserved2(z)
 
             # recurrent
             hidden_state = self.conv_recurrent_cell(z, hidden_state)

@@ -1,0 +1,6 @@
+INFO:0:train:(174948.25, tensor(25.9014))
+INFO:0:test:(16798.232421875, tensor(3.1079))
+INFO:1:train:(545469.75, tensor(54.4867))
+INFO:1:test:(21560.66015625, tensor(3.8971))
+INFO:2:train:(610002.75, tensor(57.9838))
+INFO:2:test:(25438.083984375, tensor(4.5273))

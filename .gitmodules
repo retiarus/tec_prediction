@@ -1,0 +1,6 @@
+[submodule "ConvLSTM_pytorch"]
+	path = ConvLSTM_pytorch
+	url = https://github.com/ndrplz/ConvLSTM_pytorch
+[submodule "TCN"]
+	path = TCN
+	url = https://github.com/locuslab/TCN

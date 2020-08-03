@@ -16,7 +16,8 @@ class SequenceLoader(data.Dataset):
                  step_min,
                  window_train,
                  window_predict,
-                 data=None):
+                 data=None,
+                 station=None):
         """Init function."""
 
         self.name = name

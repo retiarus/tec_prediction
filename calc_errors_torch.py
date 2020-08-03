@@ -89,8 +89,8 @@ def global_calc_errors(rms_global_mean, loss, rms_, rms_latitude,
                        rms_per_frame, rms_per_sequence, window_predict, count):
     rms_global_mean = np.array(rms_global_mean)
 
-    print("RMS GLOBAL MEAN", rms_global_mean.shape,
-          np_rms(rms_global_mean, axis=0).mean())
+#    print("RMS GLOBAL MEAN", rms_global_mean.shape,
+#          np_rms(rms_global_mean, axis=0).mean())
 
     loss = loss / count
     rms_ = rms_ / count

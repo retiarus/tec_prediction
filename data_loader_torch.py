@@ -3,14 +3,15 @@ import pdb
 import pickle
 from os.path import basename, isfile, join
 
-import numpy as np
-from numpy import arange, array, zeros
-
 import h5py
+import numpy as np
 import pandas as pd
 import torch.utils.data as data
+from numpy import arange, array, zeros
 from redis import ConnectionError, Redis
 from torch import Tensor
+
+from station import is_equinox, is_summer, is_winter
 
 
 class SequenceLoader(data.Dataset):
@@ -22,7 +23,8 @@ class SequenceLoader(data.Dataset):
                  step_min,
                  window_train,
                  window_predict,
-                 data=None):
+                 data=None,
+                 station=None):
         """Init function."""
 
         self.name = name
@@ -61,6 +63,19 @@ class SequenceLoader(data.Dataset):
         else:
             raise Exception(f'No valid df and samples list find in {file}')
 
+        if station == 'all':
+            pass
+        elif station == 'summer':
+            self.samples = [i for i in self.samples if is_summer(i)]
+        elif station == 'winter':
+            self.samples = [i for i in self.samples if is_winter(i)]
+        elif station == 'equinox':
+            self.samples = [i for i in self.samples if is_equinox(i)]
+        else:
+            raise Exception(f'Invalid station => {station}')
+
+        self.samples = np.array(self.samples)[np.random.choice(len(self.samples), 1000)]
+
     def load(self, index):
         r = Redis(host="localhost")
         try:
@@ -88,7 +103,7 @@ class SequenceLoader(data.Dataset):
                                 if aux_array is None:
                                     aux_array = array(hdf.get(key))
 
-                                    if self.data == "tec+scin":
+                                    if self.data == "tec+scin" or self.data == "tec":
                                         aux_array[0, :, :][aux_array[0, :, :] == -np.inf] = 0
                                         aux_array[0, :, :][aux_array[0, :, :] < 0] = np.quantile(aux_array[0, :, :], 0.10)
                                         aux_array[0, :, :] /= 250
@@ -96,7 +111,7 @@ class SequenceLoader(data.Dataset):
                                     self.store_to_cache(r, key, aux_array)
                             else:
                                 aux_array = array(hdf.get(key))
-                                if self.data == "tec+scin":
+                                if self.data == "tec+scin" or self.data == "tec":
                                     aux_array[0, :, :][aux_array[0, :, :] == -np.inf] = 0
                                     aux_array[0, :, :][aux_array[0, :, :] < 0] = np.quantile(aux_array[0, :, :], 0.10)
                                     aux_array[0, :, :] /= 250

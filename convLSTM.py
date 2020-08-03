@@ -18,6 +18,8 @@ from torch.autograd import Variable
 
 torch.set_default_dtype(torch.float32)
 
+def swish(x):
+    return x * torch.sigmoid(x)
 
 class CLSTM_cell(nn.Module):
     """Initialize a basic Conv LSTM cell.
@@ -78,7 +80,9 @@ class CLSTM_cell(nn.Module):
         f = torch.sigmoid(af)
         o = torch.sigmoid(ao)
         g = torch.tanh(ag)
+        #g = torch.tanh(ag) + swish(ag)
 
         next_c = f * c + i * g
         next_h = o * torch.tanh(next_c)
+        #next_h = o * (torch.tanh(next_c) + swish(next_c))
         return next_h, next_c

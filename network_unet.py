@@ -189,5 +189,5 @@ class UnetConvRecurrent(nn.Module):
 
     def load_from_filename(self, model_path):
         """Load weights method."""
-        th = torch.load(model_path)  # load the weigths
+        th = torch.load(model_path, map_location=torch.device('cpu'))  # load the weigths
         self.load_state_dict(th)
